@@ -2,11 +2,22 @@
 
 # frontend
 
-A new Flutter project.
+This project is a Flutter application. Before you start, make sure dart and flutter is installed correctly.
+Use the command "flutter doctor" to check if flutter is installed correctly.
 
 ## Getting Started
 
-This project is a starting point for a Flutter application.
+In order to run the application, you need to have your own google maps API key.
+
+- [Get google API key (for small use its free)](https://developers.google.com/maps/documentation/maps-static/get-api-key)
+
+Add the API key to your "environmental variables". (Windows button -> type in "path" -> press enter)
+Variable name: MAPS_API_KEY
+Value: <your_key>
+
+
+
+
 
 A few resources to get you started if this is your first Flutter project:
 
