@@ -1,3 +1,5 @@
+import 'package:airbnb/HomeScreen.dart';
+import 'package:airbnb/models/mockModel.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -29,6 +31,9 @@ class _MyAppState extends State<MyApp> {
         ),
       ],
       child: MaterialApp(
+        home: HomeScreen(),
+      ),
+      /*MaterialApp(
         routes: {
           '/': (BuildContext context) => QuizzMap(
                 initialLocation: PlaceLocation(
@@ -39,7 +44,7 @@ class _MyAppState extends State<MyApp> {
                 isSelecting: false,
               ),
         },
-      ),
+      ),*/
     );
   }
 }
