@@ -1,13 +1,12 @@
 import 'package:airbnb/HomeScreen.dart';
-import 'package:airbnb/models/mockModel.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:url_strategy/url_strategy.dart';
 
-import 'map.dart';
-import 'models/place.dart';
 import 'models/placeProvider.dart';
 
 void main() {
+  setPathUrlStrategy();
   runApp(MyApp());
 }
 

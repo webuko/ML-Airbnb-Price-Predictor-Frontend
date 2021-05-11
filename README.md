@@ -1,3 +1,5 @@
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/7a35c19dfe1c446a95bc8d5d0b922ffe)](https://www.codacy.com?utm_source=github.com&utm_medium=referral&utm_content=webuko/frontend&utm_campaign=Badge_Grade)
+
 # frontend
 
 This project is a Flutter application. Before you start, make sure dart and flutter is installed correctly.
