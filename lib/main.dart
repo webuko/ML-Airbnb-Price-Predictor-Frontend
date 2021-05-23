@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:url_strategy/url_strategy.dart';
 
-import 'models/placeProvider.dart';
+import 'api/flatProvider.dart';
 
 void main() {
   setPathUrlStrategy();
@@ -26,7 +26,7 @@ class _MyAppState extends State<MyApp> {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(
-          create: (_) => PlaceProvider(),
+          create: (_) => FlatProvider(),
         ),
       ],
       child: MaterialApp(

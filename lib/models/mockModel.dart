@@ -5,13 +5,18 @@ class Host {
   final String price;
   final String rating;
 
-  Host({this.name, this.image, this.desc, this.price, this.rating});
+  Host(
+      {required this.name,
+      required this.image,
+      required this.desc,
+      required this.price,
+      required this.rating});
 }
 
 class GeneralModelList {
   final List<Host> host;
 
-  GeneralModelList({this.host});
+  GeneralModelList({required this.host});
 }
 
 final GeneralModelList categoryList = new GeneralModelList(
