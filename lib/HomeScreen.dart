@@ -24,13 +24,14 @@ class _HomeScreenState extends State<HomeScreen> {
     pictureUrl: "hello",
     latitude: 47.093907262310566,
     longitude: 8.27200087445975,
-    id: "a",
+    id: 1,
   );
   Completer<GoogleMapController> _controller = Completer();
 
   final bool isSelecting = false;
   bool _isLoading = false;
   late List<Flat>? flats;
+  List<Marker> markers = [];
 
   @override
   initState() {
@@ -44,8 +45,23 @@ class _HomeScreenState extends State<HomeScreen> {
     });
     await Provider.of<FlatProvider>(context, listen: false).fetchFlats();
     flats = Provider.of<FlatProvider>(context, listen: false).allFlats;
+    setMarkers();
     setState(() {
       _isLoading = false;
+    });
+  }
+
+  void setMarkers() {
+    flats?.forEach((element) {
+      markers.add(new Marker(
+        markerId: MarkerId(element.name),
+        position: LatLng(
+          element.latitude,
+          element.longitude,
+        ),
+        infoWindow: InfoWindow(title: element.name),
+        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueViolet),
+      ));
     });
   }
 
@@ -100,15 +116,15 @@ class _HomeScreenState extends State<HomeScreen> {
         mapType: MapType.normal,
         initialCameraPosition: CameraPosition(
           target: LatLng(
-            47.093907262310566,
-            8.27200087445975,
+            52.518817,
+            13.407257,
           ),
-          zoom: 18,
+          zoom: 13,
         ),
         onMapCreated: (GoogleMapController controller) {
           _controller.complete(controller);
         },
-        markers: {newYorkMarker, newYorkMarker2},
+        markers: Set.from(markers),
       ),
     );
   }
@@ -178,23 +194,3 @@ Widget _buildHighestRevenueList(context, index, List<Host> listImages) {
     ),
   );
 }
-
-Marker newYorkMarker = Marker(
-  markerId: MarkerId('newYorkMarker'),
-  position: LatLng(
-    47.093907262310566,
-    8.27200087445975,
-  ),
-  infoWindow: InfoWindow(title: "Centrum hehe"),
-  icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueViolet),
-);
-
-Marker newYorkMarker2 = Marker(
-  markerId: MarkerId('newYorkMarker2'),
-  position: LatLng(
-    47.09331469672135,
-    8.271784471241508,
-  ),
-  infoWindow: InfoWindow(title: "Centrum 2"),
-  icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueViolet),
-);

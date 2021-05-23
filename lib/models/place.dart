@@ -4,16 +4,16 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 class Flat {
-  final String id;
+  final int id;
   final String name;
   final String description;
   final String pictureUrl;
   final String neighbourhood;
   final double latitude;
   final double longitude;
-  final int accommodates;
-  final int bathrooms;
-  final int bedrooms;
+  final int? accommodates;
+  final double? bathrooms;
+  final int? bedrooms;
 
   Flat({
     required this.id,
@@ -23,8 +23,8 @@ class Flat {
     required this.neighbourhood,
     required this.latitude,
     required this.longitude,
-    required this.accommodates,
-    required this.bathrooms,
-    required this.bedrooms,
+    this.accommodates,
+    this.bathrooms,
+    this.bedrooms,
   });
 }

@@ -23,23 +23,23 @@ class FlatProvider with ChangeNotifier {
           "content-type": "application/json",
         },
       ).timeout(Duration(seconds: 6));
-      final Map<String, dynamic> responseData = json.decode(response.body);
+      final List<dynamic> responseData = json.decode(response.body);
       if (responseData == null) {
         return;
       }
       final List<Flat> _fetchtedFlatsList = [];
-      responseData.forEach((String flatId, flatData) {
+      responseData.forEach((flatData) {
         final Flat place = Flat(
           id: flatData['id'],
           name: flatData['name'],
           description: flatData['description'],
           pictureUrl: flatData['picture_url'],
-          neighbourhood: flatData['accommodates'],
-          latitude: double.parse(flatData['latitude']),
-          longitude: double.parse(flatData['longitude']),
-          accommodates: int.parse(flatData['accommodates']),
-          bathrooms: int.parse(flatData['bathrooms']),
-          bedrooms: int.parse(flatData['bedrooms']),
+          neighbourhood: flatData['neighbourhood'],
+          latitude: flatData['latitude'],
+          longitude: flatData['longitude'],
+          accommodates: flatData?['accommodates'],
+          bathrooms: flatData?['bathrooms'],
+          bedrooms: flatData?['bedrooms'],
         );
         _fetchtedFlatsList.add(place);
       });
