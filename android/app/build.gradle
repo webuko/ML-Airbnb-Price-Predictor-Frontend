@@ -35,11 +35,11 @@ android {
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId "com.example.airbnb"
-        minSdkVersion 16
+        minSdkVersion 24
         targetSdkVersion 30
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
-        manifestPlaceholders = [mapsApiKey: "$System.env.MAPS_API_KEY"]
+        manifestPlaceholders = [mapsApiKey: "$System.env.MAPS_API_KEY"] //possible to add in AndroidManifest.xml <meta-data android:name="com.google.android.geo.API_KEY"android:value="${mapsApiKey}"/>
     }
 
     buildTypes {
