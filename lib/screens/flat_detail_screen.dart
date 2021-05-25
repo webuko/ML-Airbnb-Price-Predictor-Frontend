@@ -66,7 +66,9 @@ class _FlatDetailcreenState extends State<FlatDetailScreen> {
                         padding: const EdgeInsets.all(10.0),
                         child: CircleAvatar(
                           radius: 30.0,
-                          backgroundImage: NetworkImage(element.pictureUrl),
+                          backgroundImage: element.hostPictureUrl != null
+                              ? (NetworkImage(element.hostPictureUrl!))
+                              : (NetworkImage(element.pictureUrl)),
                         ),
                       ),
                       Expanded(
@@ -91,7 +93,7 @@ class _FlatDetailcreenState extends State<FlatDetailScreen> {
                                     Padding(
                                       padding: const EdgeInsets.only(left: 3.0),
                                       child: Text(
-                                        "Raphael (static)",
+                                        element.hostName,
                                         style: TextStyle(
                                             color:
                                                 Theme.of(context).primaryColor),
@@ -123,6 +125,16 @@ class _FlatDetailcreenState extends State<FlatDetailScreen> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(12.0),
+                        child: Text(
+                          "Price: " + element.price.toString() + "€",
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 25,
+                              color: Theme.of(context).primaryColor),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(12.0),
                         child: Column(
                           children: <Widget>[
                             Icon(
@@ -130,10 +142,45 @@ class _FlatDetailcreenState extends State<FlatDetailScreen> {
                               color: Theme.of(context).primaryColor,
                             ),
                             Text(
-                              "Berlin (static)",
+                              element.city,
                               style: TextStyle(fontWeight: FontWeight.bold),
                             )
                           ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(
+                    height: 10,
+                  ),
+                  Row(
+                    children: <Widget>[
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.only(bottom: 10.0),
+                          child: Text(
+                            "Accommodates: " + element.accommodates.toString(),
+                            style: TextStyle(
+                                color: Colors.black54, fontSize: 16.0),
+                          ),
+                        ),
+                      ),
+                      Padding(
+                        padding:
+                            const EdgeInsets.only(bottom: 10.0, right: 10.0),
+                        child: Text(
+                          "Bedrooms: " + element.bedrooms.toString(),
+                          style:
+                              TextStyle(color: Colors.black54, fontSize: 16.0),
+                        ),
+                      ),
+                      Padding(
+                        padding:
+                            const EdgeInsets.only(bottom: 10.0, right: 10.0),
+                        child: Text(
+                          "Bathrooms: " + element.bathrooms.toString(),
+                          style:
+                              TextStyle(color: Colors.black54, fontSize: 16.0),
                         ),
                       ),
                     ],
@@ -166,7 +213,7 @@ class _FlatDetailcreenState extends State<FlatDetailScreen> {
                       ],
                     ),
                   ),
-                  Row(
+                  /*Row(
                     children: <Widget>[
                       Expanded(
                         child: Padding(
@@ -188,9 +235,9 @@ class _FlatDetailcreenState extends State<FlatDetailScreen> {
                         ),
                       ),
                     ],
-                  ),
+                  ), */
                   SizedBox(
-                      height: 400.0,
+                      height: 100.0,
                       child:
                           Container() /*GoogleMap(
                         onMapCreated: _onMapCreated,
