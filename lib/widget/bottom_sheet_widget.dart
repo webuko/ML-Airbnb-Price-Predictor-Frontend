@@ -17,6 +17,22 @@ class FilterSettings {
   bool _bathroomsChecked = false;
   bool _accommodatesChecked = false;
 
+  bool get priceChecked {
+    return _priceChecked;
+  }
+
+  bool get bedroomsChecked {
+    return _bedroomsChecked;
+  }
+
+  bool get bathroomsChecked {
+    return _bathroomsChecked;
+  }
+
+  bool get accommodatesChecked {
+    return _accommodatesChecked;
+  }
+
   RangeValues get currentRangeValuesPrice {
     return _currentRangeValuesPrice;
   }

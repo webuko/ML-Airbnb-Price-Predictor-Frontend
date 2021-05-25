@@ -3,7 +3,7 @@ class Flat {
   final String name;
   final String description;
   final String pictureUrl;
-  final String? hostName;
+  final String hostName;
   final String? hostPictureUrl;
   final String? neighbourhood;
   final double latitude;
@@ -11,14 +11,15 @@ class Flat {
   final int? accommodates;
   final double? bathrooms;
   final int? bedrooms;
-  final String? city;
+  final String city;
+  final double price;
 
   Flat(
       {required this.id,
       required this.name,
       required this.description,
       required this.pictureUrl,
-      this.hostName,
+      required this.hostName,
       this.hostPictureUrl,
       this.neighbourhood,
       required this.latitude,
@@ -26,5 +27,6 @@ class Flat {
       this.accommodates,
       this.bathrooms,
       this.bedrooms,
-      this.city});
+      required this.city,
+      required this.price});
 }
