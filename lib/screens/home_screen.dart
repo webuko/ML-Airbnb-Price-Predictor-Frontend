@@ -1,14 +1,12 @@
 import 'dart:async';
 
 import 'package:airbnb/models/mockModel.dart';
-import 'package:airbnb/models/place.dart';
 import 'package:airbnb/widget/bottom_sheet_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
 
 import '../api/flatProvider.dart';
-import 'flat_detail_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -16,83 +14,31 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  final Flat initialLocation = Flat(
-    name: "none",
-    accommodates: 1,
-    bathrooms: 1,
-    bedrooms: 1,
-    description: "none",
-    neighbourhood: "none",
-    pictureUrl: "none",
-    latitude: 47.093907262310566,
-    longitude: 8.27200087445975,
-    id: 1,
-  );
-  Completer<GoogleMapController> _controller = Completer();
-
   final bool isSelecting = false;
   bool _isLoadingFlats = false;
-  bool _isLoadingMarkers = false;
   bool _showBottomSheet = false;
-  late List<Flat>? flats;
-  List<Marker> markers = [];
-  late BitmapDescriptor mapMarker;
 
   @override
   initState() {
     super.initState();
     _fetchFlates();
-    _setCustomMarker();
   }
 
   _fetchFlates() async {
     setState(() {
       _isLoadingFlats = true;
     });
-    await Provider.of<FlatProvider>(context, listen: false).fetchFlats();
-    flats = Provider.of<FlatProvider>(context, listen: false).allFlats;
-    setMarkers();
+    await Provider.of<FlatProvider>(context, listen: false)
+        .allListings(context);
+    //setMarkers();
     setState(() {
       _isLoadingFlats = false;
     });
   }
 
-  _setCustomMarker() async {
-    setState(() {
-      _isLoadingMarkers = true;
-    });
-    var temp = await BitmapDescriptor.fromAssetImage(
-        ImageConfiguration(size: Size(35, 52), locale: Locale('de', 'CH')),
-        'assets/marker.png');
-    mapMarker = temp;
-    setState(() {
-      _isLoadingMarkers = false;
-    });
-  }
-
-  void setMarkers() {
-    flats?.forEach((element) {
-      markers.add(new Marker(
-        markerId: MarkerId(element.name),
-        position: LatLng(
-          element.latitude,
-          element.longitude,
-        ),
-        infoWindow: InfoWindow(title: element.name),
-        icon: mapMarker,
-        onTap: () => {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => FlatDetailScreen(element)),
-          ),
-        },
-      ));
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
-    if (_isLoadingFlats == true || _isLoadingMarkers == true) {
+    if (_isLoadingFlats == true) {
       return Center(
         child: CircularProgressIndicator(),
       );
@@ -106,7 +52,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         _showBottomSheet = !_showBottomSheet;
                       })
                     },
-                icon: Icon(Icons.open_in_full))
+                icon: Icon(Icons.filter_alt))
           ],
         ),
         body: Column(
@@ -137,20 +83,27 @@ class _HomeScreenState extends State<HomeScreen> {
                         context, index, categoryList.host);
                   }),
             ),
-            Expanded(
-              child: _googlemap(),
+            Container(
+              child: Expanded(
+                child: MyGoogleMapWidget(),
+              ),
             ),
+            _showBottomSheet == true
+                ? BottomSheetWidget()
+                : Container(
+                    height: 0,
+                  ),
           ],
         ),
-        bottomSheet: _showBottomSheet == true
-            ? BottomSheetWidget()
-            : Container(
-                height: 0,
-              ),
       );
   }
+}
 
-  Widget _googlemap() {
+class MyGoogleMapWidget extends StatelessWidget {
+  final Completer<GoogleMapController> _controller = Completer();
+
+  Widget build(BuildContext context) {
+    final myFlatProvider = context.watch<FlatProvider>();
     return Container(
       child: GoogleMap(
         mapType: MapType.normal,
@@ -164,7 +117,7 @@ class _HomeScreenState extends State<HomeScreen> {
         onMapCreated: (GoogleMapController controller) {
           _controller.complete(controller);
         },
-        markers: Set.from(markers),
+        markers: Set.from(myFlatProvider.allMarkers),
       ),
     );
   }
