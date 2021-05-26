@@ -10,9 +10,30 @@ class FlatProvider with ChangeNotifier {
   BitmapDescriptor mapMarker = BitmapDescriptor.defaultMarker;
   List<Flat> _flats = [];
   List<Marker> _markers = [];
+  List<String> _roomType = [];
+  List<String> _propertyType = [];
+  List<String> _neighbourhood = [];
+
+  bool _isLoading = false;
+
+  bool get isLoading {
+    return _isLoading;
+  }
 
   List<Flat> get allFlats {
     return List.from(_flats);
+  }
+
+  List<String> get allRoomTypes {
+    return List.from(_roomType);
+  }
+
+  List<String> get allPropertyType {
+    return List.from(_propertyType);
+  }
+
+  List<String> get allNeighbourhood {
+    return List.from(_neighbourhood);
   }
 
   List<Marker> get allMarkers {
@@ -46,10 +67,13 @@ class FlatProvider with ChangeNotifier {
         },
       ));
     });
+    _isLoading = false;
     notifyListeners();
   }
 
   Future<void> allListings(context) async {
+    _isLoading = true;
+    notifyListeners();
     final url = 'http://localhost:5000/api/allListings';
     try {
       final response = await http.get(
@@ -77,7 +101,15 @@ class FlatProvider with ChangeNotifier {
               ? flatData['host_name']
               : "No host name available!",
           hostPictureUrl: flatData?['host_picture_url'],
-          neighbourhood: flatData['neighbourhood'],
+          neighbourhood: flatData['neighbourhood'] != null
+              ? flatData['neighbourhood']
+              : "No neighbourhood data available!",
+          roomType: flatData['room_type'] != null
+              ? flatData['room_type']
+              : "No room type data available!",
+          propertyType: flatData['property_type'] != null
+              ? flatData['property_type']
+              : "No property type data available!",
           latitude: flatData['latitude'],
           longitude: flatData['longitude'],
           accommodates: flatData?['accommodates'],
@@ -86,6 +118,15 @@ class FlatProvider with ChangeNotifier {
           city: flatData['city'] != null ? flatData['city'] : "Not available!",
           price: flatData?['price'],
         );
+        if (!_propertyType.contains(place.propertyType!)) {
+          _propertyType.add(place.propertyType!);
+        }
+        if (!_roomType.contains(place.roomType!)) {
+          _roomType.add(place.roomType!);
+        }
+        if (!_neighbourhood.contains(place.neighbourhood!)) {
+          _neighbourhood.add(place.neighbourhood!);
+        }
         _fetchtedFlatsList.add(place);
       });
       _flats = _fetchtedFlatsList;
@@ -97,18 +138,18 @@ class FlatProvider with ChangeNotifier {
   }
 
   Future<void> filterListings(FilterSettings filterSettings, context) async {
+    _isLoading = true;
+    notifyListeners();
     Map<String, dynamic> data = {};
     print(data.isEmpty);
 
     Map<String, dynamic> _price;
     if (filterSettings.priceChecked == true) {
       _price = {
-        'criteria': {
-          'price': [
-            filterSettings.currentRangeValuesPrice.start,
-            filterSettings.currentRangeValuesPrice.end
-          ],
-        }
+        'price': [
+          filterSettings.currentRangeValuesPrice.start,
+          filterSettings.currentRangeValuesPrice.end
+        ],
       };
       data.addAll(_price);
     }
@@ -116,12 +157,10 @@ class FlatProvider with ChangeNotifier {
     Map<String, dynamic> _bedrooms;
     if (filterSettings.bedroomsChecked == true) {
       _bedrooms = {
-        'criteria': {
-          'bedrooms': [
-            filterSettings.currentRangeValuesBedrooms.start,
-            filterSettings.currentRangeValuesBedrooms.end
-          ],
-        }
+        'bedrooms': [
+          filterSettings.currentRangeValuesBedrooms.start,
+          filterSettings.currentRangeValuesBedrooms.end
+        ],
       };
       data.addAll(_bedrooms);
     }
@@ -129,12 +168,10 @@ class FlatProvider with ChangeNotifier {
     Map<String, dynamic> _bathrooms;
     if (filterSettings.bathroomsChecked == true) {
       _bathrooms = {
-        'criteria': {
-          'bathrooms': [
-            filterSettings.currentRangeValuesBathrooms.start,
-            filterSettings.currentRangeValuesBathrooms.end
-          ],
-        }
+        'bathrooms': [
+          filterSettings.currentRangeValuesBathrooms.start,
+          filterSettings.currentRangeValuesBathrooms.end
+        ],
       };
       data.addAll(_bathrooms);
     }
@@ -142,19 +179,47 @@ class FlatProvider with ChangeNotifier {
     Map<String, dynamic> _accommodates;
     if (filterSettings.bathroomsChecked == true) {
       _accommodates = {
-        'criteria': {
-          'accommodates': [
-            filterSettings.currentRangeValuesAccommodates.start,
-            filterSettings.currentRangeValuesAccommodates.end
-          ],
-        }
+        'accommodates': [
+          filterSettings.currentRangeValuesAccommodates.start,
+          filterSettings.currentRangeValuesAccommodates.end
+        ],
       };
       data.addAll(_accommodates);
     }
 
+    Map<String, dynamic> _propertyType;
+    if (filterSettings.propertyTypeChecked == true) {
+      _propertyType = {
+        'property_type': [filterSettings.propertyType],
+      };
+      //data.addAll(_propertyType);
+      data.addAll(_propertyType);
+    }
+
+    Map<String, dynamic> _roomType;
+    if (filterSettings.roomTypeChecked == true) {
+      _roomType = {
+        'room_type': [filterSettings.roomType],
+      };
+      //data.addAll(_roomType);
+      data.addAll(_roomType);
+    }
+
+    Map<String, dynamic> _neighbourhood;
+    if (filterSettings.neighbourhoodTypeChecked == true) {
+      _neighbourhood = {
+        'neighbourhood': [filterSettings.neighbourhood],
+      };
+      data.addAll(_neighbourhood);
+    }
+
+    Map<String, dynamic> finalData = {};
+
     if (data.isEmpty) {
       Map<String, dynamic> _emptyFilter = {'criteria': {}};
-      data.addAll(_emptyFilter);
+      finalData.addAll(_emptyFilter);
+    } else {
+      finalData = {'criteria': data};
     }
 
     final url = 'http://localhost:5000/api/filterListings';
@@ -165,7 +230,7 @@ class FlatProvider with ChangeNotifier {
             headers: {
               "content-type": "application/json",
             },
-            body: jsonEncode(data),
+            body: jsonEncode(finalData),
           )
           .timeout(Duration(seconds: 6));
       final List<dynamic> responseData = json.decode(response.body);

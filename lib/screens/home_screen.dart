@@ -104,22 +104,27 @@ class MyGoogleMapWidget extends StatelessWidget {
 
   Widget build(BuildContext context) {
     final myFlatProvider = context.watch<FlatProvider>();
-    return Container(
-      child: GoogleMap(
-        mapType: MapType.normal,
-        initialCameraPosition: CameraPosition(
-          target: LatLng(
-            52.518817,
-            13.407257,
+    if (myFlatProvider.isLoading == true) {
+      return Center(
+        child: CircularProgressIndicator(),
+      );
+    } else
+      return Container(
+        child: GoogleMap(
+          mapType: MapType.normal,
+          initialCameraPosition: CameraPosition(
+            target: LatLng(
+              52.518817,
+              13.407257,
+            ),
+            zoom: 16,
           ),
-          zoom: 13,
+          onMapCreated: (GoogleMapController controller) {
+            _controller.complete(controller);
+          },
+          markers: Set.from(myFlatProvider.allMarkers),
         ),
-        onMapCreated: (GoogleMapController controller) {
-          _controller.complete(controller);
-        },
-        markers: Set.from(myFlatProvider.allMarkers),
-      ),
-    );
+      );
   }
 }
 

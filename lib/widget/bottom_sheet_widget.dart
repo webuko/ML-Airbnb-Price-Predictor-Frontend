@@ -1,5 +1,6 @@
 import 'package:airbnb/api/flatProvider.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:provider/provider.dart';
 
 class BottomSheetWidget extends StatefulWidget {
@@ -8,6 +9,7 @@ class BottomSheetWidget extends StatefulWidget {
 }
 
 class FilterSettings {
+  //Numeric filters
   RangeValues _currentRangeValuesPrice = const RangeValues(0, 200);
   RangeValues _currentRangeValuesBedrooms = const RangeValues(1, 10);
   RangeValues _currentRangeValuesBathrooms = const RangeValues(1, 10);
@@ -48,15 +50,136 @@ class FilterSettings {
   RangeValues get currentRangeValuesAccommodates {
     return _currentRangeValuesAccommodates;
   }
+
+  //Filters by String
+  String? propertyType = "";
+  String? roomType = "";
+  String? neighbourhood = "";
+
+  bool _propertyTypeChecked = false;
+  bool _roomTypeChecked = false;
+  bool _neighbourhoodChecked = false;
+
+  bool get propertyTypeChecked {
+    return _propertyTypeChecked;
+  }
+
+  bool get roomTypeChecked {
+    return _roomTypeChecked;
+  }
+
+  bool get neighbourhoodTypeChecked {
+    return _neighbourhoodChecked;
+  }
+
+  String get currentPropertyType {
+    return propertyType!;
+  }
+
+  String get currentRoomType {
+    return roomType!;
+  }
+
+  String get currentNeighbourhood {
+    return neighbourhood!;
+  }
 }
 
 class _BottomSheetWidgetState extends State<BottomSheetWidget> {
   final String title = "BottomSheetWidget";
   FilterSettings filterSettings = FilterSettings();
 
+  final controllerPropertyType = TextEditingController();
+  final controllerRoomType = TextEditingController();
+  final controllerNeighbourhood = TextEditingController();
+
+  final formKey = GlobalKey<FormState>();
+
   @override
   Widget build(BuildContext context) {
     final myFlatProvider = context.watch<FlatProvider>();
+
+    List<String> getSuggestionsPropertyTypes(String query) =>
+        List.of(myFlatProvider.allPropertyType).where((input) {
+          final inputLower = input.toLowerCase();
+          final queryLower = query.toLowerCase();
+          return inputLower.contains(queryLower);
+        }).toList();
+
+    List<String> getSuggestionsRoomTypes(String query) =>
+        List.of(myFlatProvider.allRoomTypes).where((input) {
+          final inputLower = input.toLowerCase();
+          final queryLower = query.toLowerCase();
+          return inputLower.contains(queryLower);
+        }).toList();
+
+    List<String> getSuggestionsNeighbourhood(String query) =>
+        List.of(myFlatProvider.allNeighbourhood).where((input) {
+          final inputLower = input.toLowerCase();
+          final queryLower = query.toLowerCase();
+          return inputLower.contains(queryLower);
+        }).toList();
+
+    Widget buildPropertyType() => TypeAheadFormField<String?>(
+          direction: AxisDirection.up,
+          textFieldConfiguration: TextFieldConfiguration(
+              controller: controllerPropertyType,
+              decoration: InputDecoration(
+                labelText: "Property Type",
+              )),
+          suggestionsCallback: getSuggestionsPropertyTypes,
+          itemBuilder: (context, String? suggestion) => ListTile(
+            title: Text(suggestion!),
+          ),
+          onSuggestionSelected: (String? suggestion) => {
+            controllerPropertyType.text = suggestion!,
+          },
+          validator: (value) => value != null && value.isEmpty
+              ? 'Please select an property type!'
+              : null,
+          onSaved: (value) => filterSettings.propertyType = value,
+        );
+
+    Widget buildRoomType() => TypeAheadFormField<String?>(
+          direction: AxisDirection.up,
+          textFieldConfiguration: TextFieldConfiguration(
+              controller: controllerRoomType,
+              decoration: InputDecoration(
+                labelText: "Room Type",
+              )),
+          suggestionsCallback: getSuggestionsRoomTypes,
+          itemBuilder: (context, String? suggestion) => ListTile(
+            title: Text(suggestion!),
+          ),
+          onSuggestionSelected: (String? suggestion) => {
+            controllerRoomType.text = suggestion!,
+          },
+          validator: (value) => value != null && value.isEmpty
+              ? 'Please select a room type!'
+              : null,
+          onSaved: (value) => filterSettings.roomType = value,
+        );
+
+    Widget buildNeighbourhoodType() => TypeAheadFormField<String?>(
+          direction: AxisDirection.up,
+          textFieldConfiguration: TextFieldConfiguration(
+              controller: controllerNeighbourhood,
+              decoration: InputDecoration(
+                labelText: "Neighbourhood",
+              )),
+          suggestionsCallback: getSuggestionsNeighbourhood,
+          itemBuilder: (context, String? suggestion) => ListTile(
+            title: Text(suggestion!),
+          ),
+          onSuggestionSelected: (String? suggestion) => {
+            controllerNeighbourhood.text = suggestion!,
+          },
+          validator: (value) => value != null && value.isEmpty
+              ? 'Please select a neighbourhood!'
+              : null,
+          onSaved: (value) => filterSettings.neighbourhood = value,
+        );
+
     return Container(
       width: MediaQuery.of(context).size.width,
       padding: EdgeInsets.all(16),
@@ -307,10 +430,96 @@ class _BottomSheetWidgetState extends State<BottomSheetWidget> {
               ],
             ),
           ),
+          Form(
+            key: formKey,
+            child: Column(
+              children: [
+                Container(
+                  height: 50,
+                  child: Row(
+                    children: [
+                      Checkbox(
+                        value: this.filterSettings._propertyTypeChecked,
+                        onChanged: (value) {
+                          setState(() {
+                            this.filterSettings._propertyTypeChecked = value!;
+                          });
+                        },
+                      ),
+                      Container(
+                        width: 190,
+                        child: Text("Property Type"),
+                      ),
+                      filterSettings._propertyTypeChecked == false
+                          ? Container()
+                          : Expanded(
+                              child: buildPropertyType(),
+                            ),
+                    ],
+                  ),
+                ),
+                Container(
+                  height: 50,
+                  child: Row(
+                    children: [
+                      Checkbox(
+                        value: this.filterSettings._roomTypeChecked,
+                        onChanged: (value) {
+                          setState(() {
+                            this.filterSettings._roomTypeChecked = value!;
+                          });
+                        },
+                      ),
+                      Container(
+                        width: 190,
+                        child: Text("Room Type"),
+                      ),
+                      filterSettings._roomTypeChecked == false
+                          ? Container()
+                          : Expanded(
+                              child: buildRoomType(),
+                            ),
+                    ],
+                  ),
+                ),
+                Container(
+                  height: 50,
+                  child: Row(
+                    children: [
+                      Checkbox(
+                        value: this.filterSettings._neighbourhoodChecked,
+                        onChanged: (value) {
+                          setState(() {
+                            this.filterSettings._neighbourhoodChecked = value!;
+                          });
+                        },
+                      ),
+                      Container(
+                        width: 190,
+                        child: Text("Neighbourhood"),
+                      ),
+                      filterSettings._neighbourhoodChecked == false
+                          ? Container()
+                          : Expanded(
+                              child: buildNeighbourhoodType(),
+                            ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          SizedBox(
+            height: 20,
+          ),
           ElevatedButton(
             child: Text('Speichern'),
             onPressed: () => {
-              _submit(filterSettings, myFlatProvider),
+              if (formKey.currentState!.validate())
+                {
+                  formKey.currentState!.save(),
+                  _submit(filterSettings, myFlatProvider)
+                }
             },
           ),
         ],
