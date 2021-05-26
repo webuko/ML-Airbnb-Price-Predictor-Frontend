@@ -1,32 +1,37 @@
-import 'dart:io';
-
-import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
-
-class PlaceLocation {
-  final String id;
+class Flat {
+  final int id;
+  final String name;
+  final String description;
+  final String pictureUrl;
+  final String hostName;
+  final String? hostPictureUrl;
+  final String? neighbourhood;
   final double latitude;
   final double longitude;
-  final String address;
+  final int? accommodates;
+  final double? bathrooms;
+  final int? bedrooms;
+  final String city;
+  final double price;
+  final String? propertyType;
+  final String? roomType;
 
-  const PlaceLocation({
-    @required this.latitude,
-    @required this.longitude,
-    this.address,
-    this.id,
-  });
-}
-
-class Place {
-  final String id;
-  final String title;
-  final PlaceLocation location;
-  final File image;
-
-  Place({
-    @required this.id,
-    @required this.title,
-    @required this.location,
-    @required this.image,
+  Flat({
+    required this.id,
+    required this.name,
+    required this.description,
+    required this.pictureUrl,
+    required this.hostName,
+    this.hostPictureUrl,
+    this.neighbourhood,
+    required this.latitude,
+    required this.longitude,
+    this.accommodates,
+    this.bathrooms,
+    this.bedrooms,
+    required this.city,
+    required this.price,
+    this.propertyType,
+    this.roomType,
   });
 }
