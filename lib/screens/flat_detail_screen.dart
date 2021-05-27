@@ -25,7 +25,7 @@ class _FlatDetailcreenState extends State<FlatDetailScreen> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext flatScreenContext) {
     Size size = MediaQuery.of(context).size;
     return Scaffold(
       body: ListView(
@@ -33,7 +33,7 @@ class _FlatDetailcreenState extends State<FlatDetailScreen> {
           AppBar(
             leading: GestureDetector(
               onTap: () {
-                Navigator.pop(context);
+                Navigator.pop(flatScreenContext);
               },
               child: Icon(Icons.arrow_back),
             ),

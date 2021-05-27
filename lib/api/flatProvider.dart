@@ -1,6 +1,6 @@
 import 'package:airbnb/models/place.dart';
 import 'package:airbnb/screens/flat_detail_screen.dart';
-import 'package:airbnb/widget/bottom_sheet_widget.dart';
+import 'package:airbnb/widget/bottom_sheet_widget_filter.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
@@ -14,10 +14,19 @@ class FlatProvider with ChangeNotifier {
   List<String> _propertyType = [];
   List<String> _neighbourhood = [];
 
+  bool _drawerActive = false;
   bool _isLoading = false;
 
   bool get isLoading {
     return _isLoading;
+  }
+
+  bool get isDrawerOpen {
+    return _drawerActive;
+  }
+
+  void setDrawerOpen(bool isDrawerOpen) {
+    _drawerActive = isDrawerOpen;
   }
 
   List<Flat> get allFlats {
@@ -44,7 +53,7 @@ class FlatProvider with ChangeNotifier {
     return _flats[i];
   }
 
-  void setMarkers(context) async {
+  void setMarkers() async {
     var temp = await BitmapDescriptor.fromAssetImage(
         ImageConfiguration(size: Size(35, 52), locale: Locale('de', 'CH')),
         'assets/marker.png');
@@ -52,7 +61,7 @@ class FlatProvider with ChangeNotifier {
     _markers = [];
     _flats.forEach((element) {
       _markers.add(new Marker(
-        markerId: MarkerId(element.name),
+        markerId: MarkerId(element.id.toString()),
         position: LatLng(
           element.latitude,
           element.longitude,
@@ -60,10 +69,13 @@ class FlatProvider with ChangeNotifier {
         //infoWindow: InfoWindow(title: element.name),
         icon: mapMarker,
         onTap: () => {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => FlatDetailScreen(element)),
-          ),
+          if (!_drawerActive)
+            {
+              Navigator.of(_context, rootNavigator: true).push(
+                MaterialPageRoute(
+                    builder: (context) => FlatDetailScreen(element)),
+              ),
+            }
         },
       ));
     });
@@ -71,9 +83,11 @@ class FlatProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> allListings(context) async {
+  var _context;
+  Future<void> allListings(ctx) async {
+    _context = ctx;
     _isLoading = true;
-    notifyListeners();
+    // notifyListeners();
     final url = 'http://localhost:5000/api/allListings';
     try {
       final response = await http.get(
@@ -130,16 +144,16 @@ class FlatProvider with ChangeNotifier {
         _fetchtedFlatsList.add(place);
       });
       _flats = _fetchtedFlatsList;
-      setMarkers(context);
+      setMarkers();
     } catch (error) {
       debugPrint(error.toString());
       return;
     }
   }
 
-  Future<void> filterListings(FilterSettings filterSettings, context) async {
+  Future<void> filterListings(FilterSettings filterSettings) async {
     _isLoading = true;
-    notifyListeners();
+    // notifyListeners();
     Map<String, dynamic> data = {};
     print(data.isEmpty);
 
@@ -264,7 +278,7 @@ class FlatProvider with ChangeNotifier {
         _fetchtedFlatsList.add(place);
       });
       _flats = _fetchtedFlatsList;
-      setMarkers(context);
+      setMarkers();
     } catch (error) {
       debugPrint(error.toString());
       return;

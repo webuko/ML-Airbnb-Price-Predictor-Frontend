@@ -1,9 +1,13 @@
 import 'dart:async';
 
 import 'package:airbnb/models/mockModel.dart';
-import 'package:airbnb/widget/bottom_sheet_widget.dart';
+import 'package:airbnb/widget/bottom_sheet_widget_filter.dart';
+import 'package:airbnb/widget/bottom_sheet_widget_price_prediction.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:pointer_interceptor/pointer_interceptor.dart';
 import 'package:provider/provider.dart';
 
 import '../api/flatProvider.dart';
@@ -16,7 +20,9 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final bool isSelecting = false;
   bool _isLoadingFlats = false;
-  bool _showBottomSheet = false;
+  bool _showBottomSheetFiltering = false;
+  bool _showBottomSheetPricePrediction = false;
+  bool _showFloatingActionButton = false;
 
   @override
   initState() {
@@ -38,28 +44,67 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final myFlatProvider = context.read<FlatProvider>();
     if (_isLoadingFlats == true) {
       return Center(
         child: CircularProgressIndicator(),
       );
     } else
       return Scaffold(
-        appBar: AppBar(
-          actions: [
-            IconButton(
-                onPressed: () => {
-                      setState(() {
-                        _showBottomSheet = !_showBottomSheet;
-                      })
-                    },
-                icon: Icon(Icons.filter_alt))
-          ],
+        onEndDrawerChanged: (isOpen) {
+          setState(() {
+            myFlatProvider.setDrawerOpen(isOpen);
+          });
+        },
+        endDrawer: PointerInterceptor(
+          child: Drawer(
+            child: ListView(
+              padding: EdgeInsets.zero,
+              children: [
+                DrawerHeader(
+                  decoration: BoxDecoration(color: Colors.blue),
+                  child: Text("Header"),
+                ),
+                ListTile(
+                  title: Text('Filter Listings'),
+                  onTap: () {
+                    // Update the state of the app
+                    setState(() {
+                      //Set other bottom sheets to false
+                      _showBottomSheetPricePrediction = false;
+
+                      _showBottomSheetFiltering = true;
+                      _showFloatingActionButton = true;
+                    });
+                    // Then close the drawer
+                    Navigator.pop(context);
+                  },
+                ),
+                ListTile(
+                  title: Text('Price prediction'),
+                  onTap: () {
+                    // Update the state of the app
+                    setState(() {
+                      //Set other bottom sheets to false
+                      _showBottomSheetFiltering = false;
+
+                      _showBottomSheetPricePrediction = true;
+                      _showFloatingActionButton = true;
+                    });
+                    // Then close the drawer
+                    Navigator.pop(context);
+                  },
+                ),
+              ],
+            ),
+          ),
         ),
+        appBar: AppBar(),
         body: Column(
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            Padding(
+            /* Padding(
               padding: const EdgeInsets.only(
                 top: 10.0,
                 left: 10.0,
@@ -82,24 +127,46 @@ class _HomeScreenState extends State<HomeScreen> {
                     return _buildHighestRevenueList(
                         context, index, categoryList.host);
                   }),
-            ),
+            ),*/
             Container(
               child: Expanded(
-                child: MyGoogleMapWidget(),
+                child: MyGoogleMapWidget(myFlatProvider.isDrawerOpen),
               ),
             ),
-            _showBottomSheet == true
-                ? BottomSheetWidget()
-                : Container(
-                    height: 0,
-                  ),
+            (() {
+              if (_showBottomSheetFiltering == true) {
+                return BottomSheetWidgetFiltering();
+              } else if (_showBottomSheetPricePrediction == true) {
+                return BottomSheetWidgetPricePrediction();
+              } else {
+                return Container(
+                  height: 0,
+                );
+              }
+            }())
           ],
         ),
+        floatingActionButton: _showFloatingActionButton == true
+            ? FloatingActionButton(
+                onPressed: () {
+                  print('Floating action button pressed');
+                  setState(() {
+                    _showBottomSheetFiltering = false;
+                    _showBottomSheetPricePrediction = false;
+                    _showFloatingActionButton = false;
+                  });
+                },
+                child: const Icon(Icons.close),
+              )
+            : null,
+        //floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
       );
   }
 }
 
 class MyGoogleMapWidget extends StatelessWidget {
+  final bool _drawerActive;
+  MyGoogleMapWidget(this._drawerActive);
   final Completer<GoogleMapController> _controller = Completer();
 
   Widget build(BuildContext context) {
@@ -111,6 +178,7 @@ class MyGoogleMapWidget extends StatelessWidget {
     } else
       return Container(
         child: GoogleMap(
+          scrollGesturesEnabled: _drawerActive == true ? false : true,
           mapType: MapType.normal,
           initialCameraPosition: CameraPosition(
             target: LatLng(
@@ -123,6 +191,10 @@ class MyGoogleMapWidget extends StatelessWidget {
             _controller.complete(controller);
           },
           markers: Set.from(myFlatProvider.allMarkers),
+          gestureRecognizers: {
+            Factory<OneSequenceGestureRecognizer>(
+                () => ScaleGestureRecognizer()),
+          },
         ),
       );
   }

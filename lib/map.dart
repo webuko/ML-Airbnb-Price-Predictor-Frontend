@@ -40,7 +40,8 @@ class _BaseMapState extends State<HomeMap> {
               onPressed: _pickedLocation == null
                   ? null
                   : () {
-                      Navigator.of(context).pop(_pickedLocation);
+                      Navigator.of(context, rootNavigator: true)
+                          .pop(_pickedLocation);
                     },
             ),
         ],
