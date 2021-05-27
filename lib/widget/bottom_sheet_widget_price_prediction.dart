@@ -3,9 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:provider/provider.dart';
 
-class BottomSheetWidget extends StatefulWidget {
+class BottomSheetWidgetPricePrediction extends StatefulWidget {
   @override
-  State<StatefulWidget> createState() => _BottomSheetWidgetState();
+  State<StatefulWidget> createState() =>
+      _BottomSheetWidgetPricePredictionState();
 }
 
 class FilterSettings {
@@ -85,7 +86,8 @@ class FilterSettings {
   }
 }
 
-class _BottomSheetWidgetState extends State<BottomSheetWidget> {
+class _BottomSheetWidgetPricePredictionState
+    extends State<BottomSheetWidgetPricePrediction> {
   final String title = "BottomSheetWidget";
   FilterSettings filterSettings = FilterSettings();
 
@@ -94,6 +96,7 @@ class _BottomSheetWidgetState extends State<BottomSheetWidget> {
   final controllerNeighbourhood = TextEditingController();
 
   final formKey = GlobalKey<FormState>();
+  bool _isLoading = false;
 
   @override
   Widget build(BuildContext context) {
@@ -186,9 +189,26 @@ class _BottomSheetWidgetState extends State<BottomSheetWidget> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
-          Text("Filter Listings (" +
-              myFlatProvider.allFlats.length.toString() +
-              " flats left)"),
+          _isLoading == true
+              ? Container(
+                  height: 20,
+                  width: 20,
+                  child: Center(
+                    child: CircularProgressIndicator(),
+                  ),
+                )
+              : Container(
+                  height: 20,
+                  child: Text(
+                    "Filter Listings (" +
+                        myFlatProvider.allFlats.length.toString() +
+                        " flats left)",
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                    ),
+                  ),
+                ),
           Container(
             height: 50,
             child: Row(
@@ -242,6 +262,7 @@ class _BottomSheetWidgetState extends State<BottomSheetWidget> {
                             setState(() {
                               filterSettings._currentRangeValuesPrice = values;
                             });
+                            //  _submit(filterSettings, myFlatProvider);
                           },
                         ),
                       )
@@ -513,7 +534,7 @@ class _BottomSheetWidgetState extends State<BottomSheetWidget> {
             height: 20,
           ),
           ElevatedButton(
-            child: Text('Speichern'),
+            child: Text('Save'),
             onPressed: () => {
               if (formKey.currentState!.validate())
                 {
@@ -528,6 +549,12 @@ class _BottomSheetWidgetState extends State<BottomSheetWidget> {
   }
 
   Future<void> _submit(FilterSettings filterSettings, myFlatProvider) async {
-    await myFlatProvider.filterListings(filterSettings, context);
+    setState(() {
+      _isLoading = true;
+    });
+    await myFlatProvider.filterListings(filterSettings);
+    setState(() {
+      _isLoading = false;
+    });
   }
 }
