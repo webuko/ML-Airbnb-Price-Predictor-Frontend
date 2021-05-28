@@ -125,10 +125,8 @@ class _BottomSheetWidgetFilteringState
     Widget buildPropertyType() => TypeAheadFormField<String?>(
           direction: AxisDirection.up,
           textFieldConfiguration: TextFieldConfiguration(
-              controller: controllerPropertyType,
-              decoration: InputDecoration(
-                labelText: "Property Type",
-              )),
+            controller: controllerPropertyType,
+          ),
           suggestionsCallback: getSuggestionsPropertyTypes,
           itemBuilder: (context, String? suggestion) => ListTile(
             title: Text(suggestion!),
@@ -136,19 +134,23 @@ class _BottomSheetWidgetFilteringState
           onSuggestionSelected: (String? suggestion) => {
             controllerPropertyType.text = suggestion!,
           },
-          validator: (value) => value != null && value.isEmpty
-              ? 'Please select an property type!'
-              : null,
+          validator: (value) {
+            if (value != null && value.isEmpty) {
+              return 'Please select a property type!';
+            } else if (!myFlatProvider.allPropertyType.contains(value)) {
+              return 'Please select a existing property type!';
+            } else {
+              return null;
+            }
+          },
           onSaved: (value) => filterSettings.propertyType = value,
         );
 
     Widget buildRoomType() => TypeAheadFormField<String?>(
           direction: AxisDirection.up,
           textFieldConfiguration: TextFieldConfiguration(
-              controller: controllerRoomType,
-              decoration: InputDecoration(
-                labelText: "Room Type",
-              )),
+            controller: controllerRoomType,
+          ),
           suggestionsCallback: getSuggestionsRoomTypes,
           itemBuilder: (context, String? suggestion) => ListTile(
             title: Text(suggestion!),
@@ -156,19 +158,23 @@ class _BottomSheetWidgetFilteringState
           onSuggestionSelected: (String? suggestion) => {
             controllerRoomType.text = suggestion!,
           },
-          validator: (value) => value != null && value.isEmpty
-              ? 'Please select a room type!'
-              : null,
+          validator: (value) {
+            if (value != null && value.isEmpty) {
+              return 'Please select a property type!';
+            } else if (!myFlatProvider.allRoomTypes.contains(value)) {
+              return 'Please select a existing room type!';
+            } else {
+              return null;
+            }
+          },
           onSaved: (value) => filterSettings.roomType = value,
         );
 
     Widget buildNeighbourhoodType() => TypeAheadFormField<String?>(
           direction: AxisDirection.up,
           textFieldConfiguration: TextFieldConfiguration(
-              controller: controllerNeighbourhood,
-              decoration: InputDecoration(
-                labelText: "Neighbourhood",
-              )),
+            controller: controllerNeighbourhood,
+          ),
           suggestionsCallback: getSuggestionsNeighbourhood,
           itemBuilder: (context, String? suggestion) => ListTile(
             title: Text(suggestion!),
@@ -176,35 +182,41 @@ class _BottomSheetWidgetFilteringState
           onSuggestionSelected: (String? suggestion) => {
             controllerNeighbourhood.text = suggestion!,
           },
-          validator: (value) => value != null && value.isEmpty
-              ? 'Please select a neighbourhood!'
-              : null,
+          validator: (value) {
+            if (value != null && value.isEmpty) {
+              return 'Please select a property type!';
+            } else if (!myFlatProvider.allNeighbourhood.contains(value)) {
+              return 'Please select a existing neighbourhood!';
+            } else {
+              return null;
+            }
+          },
           onSaved: (value) => filterSettings.neighbourhood = value,
         );
 
     return Container(
       width: MediaQuery.of(context).size.width,
       padding: EdgeInsets.all(16),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
+      child: ListView(
         children: <Widget>[
           _isLoading == true
               ? Container(
-                  height: 20,
-                  width: 20,
+                  height: 50,
+                  width: 50,
                   child: Center(
                     child: CircularProgressIndicator(),
                   ),
                 )
               : Container(
-                  height: 20,
+                  alignment: Alignment.center,
+                  height: 50,
                   child: Text(
                     "Filter Listings (" +
                         myFlatProvider.allFlats.length.toString() +
                         " flats left)",
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
-                      fontSize: 14,
+                      fontSize: 22,
                     ),
                   ),
                 ),

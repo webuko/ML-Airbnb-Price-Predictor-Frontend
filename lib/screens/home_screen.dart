@@ -28,6 +28,7 @@ class _HomeScreenState extends State<HomeScreen> {
   initState() {
     super.initState();
     _fetchFlates();
+    _fetchPricePredictParams();
   }
 
   _fetchFlates() async {
@@ -40,6 +41,11 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() {
       _isLoadingFlats = false;
     });
+  }
+
+  _fetchPricePredictParams() async {
+    await Provider.of<FlatProvider>(context, listen: false)
+        .predictPriceParams();
   }
 
   @override
@@ -63,10 +69,17 @@ class _HomeScreenState extends State<HomeScreen> {
               children: [
                 DrawerHeader(
                   decoration: BoxDecoration(color: Colors.blue),
-                  child: Text("Header"),
+                  child: Text(
+                    "Airbnb flat price calculator",
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
                 ),
                 ListTile(
-                  title: Text('Filter Listings'),
+                  leading: Icon(Icons.filter_alt),
+                  title: Text(
+                    'Filter Listings',
+                    style: TextStyle(fontSize: 16),
+                  ),
                   onTap: () {
                     // Update the state of the app
                     setState(() {
@@ -81,7 +94,11 @@ class _HomeScreenState extends State<HomeScreen> {
                   },
                 ),
                 ListTile(
-                  title: Text('Price prediction'),
+                  leading: Icon(Icons.calculate),
+                  title: Text(
+                    'Price prediction',
+                    style: TextStyle(fontSize: 16),
+                  ),
                   onTap: () {
                     // Update the state of the app
                     setState(() {
@@ -133,7 +150,19 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: MyGoogleMapWidget(myFlatProvider.isDrawerOpen),
               ),
             ),
-            (() {
+            Container(
+              height: (_showBottomSheetFiltering == true)
+                  ? (MediaQuery.of(context).size.height / 2)
+                  : 0,
+              child: BottomSheetWidgetFiltering(),
+            ),
+            Container(
+              height: (_showBottomSheetPricePrediction == true)
+                  ? (MediaQuery.of(context).size.height / 1.5)
+                  : 0,
+              child: BottomSheetWidgetPricePrediction(),
+            ),
+            /* (() {
               if (_showBottomSheetFiltering == true) {
                 return BottomSheetWidgetFiltering();
               } else if (_showBottomSheetPricePrediction == true) {
@@ -143,7 +172,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   height: 0,
                 );
               }
-            }())
+            }())*/
           ],
         ),
         floatingActionButton: _showFloatingActionButton == true
