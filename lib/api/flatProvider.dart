@@ -1,22 +1,35 @@
 import 'package:airbnb/models/place.dart';
 import 'package:airbnb/screens/flat_detail_screen.dart';
 import 'package:airbnb/widget/bottom_sheet_widget_filter.dart';
+import 'package:airbnb/widget/bottom_sheet_widget_price_prediction.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 class FlatProvider with ChangeNotifier {
-  BitmapDescriptor mapMarker = BitmapDescriptor.defaultMarker;
   List<Flat> _flats = [];
-  List<Marker> _markers = [];
+  bool _drawerActive = false;
+  bool _isLoading = false;
+  var _context;
+
+  //Flat attributes
   List<String> _roomType = [];
   List<String> _propertyType = [];
   List<String> _neighbourhood = [];
+  List<String> _neighbourhoodCleansed = [];
+  String _predictedPrice = "";
 
-  bool _drawerActive = false;
-  bool _isLoading = false;
+  //Maps
+  BitmapDescriptor mapMarker = BitmapDescriptor.defaultMarker;
+  List<Marker> _markers = [];
+  /*
+  Set<Polygon> _polygons = HashSet<Polygon>();
+  int _polygonIdCounter = 1;
+  bool _isPolygon = true; //Default
+  */
 
+  //getters
   bool get isLoading {
     return _isLoading;
   }
@@ -33,6 +46,10 @@ class FlatProvider with ChangeNotifier {
     return List.from(_flats);
   }
 
+  String get predictedPrice {
+    return _predictedPrice;
+  }
+
   List<String> get allRoomTypes {
     return List.from(_roomType);
   }
@@ -43,6 +60,10 @@ class FlatProvider with ChangeNotifier {
 
   List<String> get allNeighbourhood {
     return List.from(_neighbourhood);
+  }
+
+  List<String> get allNeighbourhoodCleansed {
+    return List.from(_neighbourhoodCleansed);
   }
 
   List<Marker> get allMarkers {
@@ -83,7 +104,6 @@ class FlatProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  var _context;
   Future<void> allListings(ctx) async {
     _context = ctx;
     _isLoading = true;
@@ -95,7 +115,7 @@ class FlatProvider with ChangeNotifier {
         headers: {
           "content-type": "application/json",
         },
-      ).timeout(Duration(seconds: 6));
+      );
       final List<dynamic> responseData = json.decode(response.body);
       if (responseData == null) {
         return;
@@ -238,15 +258,13 @@ class FlatProvider with ChangeNotifier {
 
     final url = 'http://localhost:5000/api/filterListings';
     try {
-      final response = await http
-          .post(
-            Uri.parse(url),
-            headers: {
-              "content-type": "application/json",
-            },
-            body: jsonEncode(finalData),
-          )
-          .timeout(Duration(seconds: 6));
+      final response = await http.post(
+        Uri.parse(url),
+        headers: {
+          "content-type": "application/json",
+        },
+        body: jsonEncode(finalData),
+      );
       final List<dynamic> responseData = json.decode(response.body);
       if (responseData == null) {
         return;
@@ -284,4 +302,75 @@ class FlatProvider with ChangeNotifier {
       return;
     }
   }
+
+  Future<void> predictPrice(FilterSettingsPredictPrice filterSettings) async {
+    // notifyListeners();
+    var map = Map<String, dynamic>();
+    map["bathrooms"] = filterSettings.currentBathrooms;
+    map["bedrooms"] = filterSettings.currentBedrooms;
+    map["accommodates"] = filterSettings.currentAccommodates;
+    map["guests_included"] = filterSettings.currentGuestIncluded;
+    map["gym"] = filterSettings.checkedGym;
+    map["ac"] = filterSettings.checkedAirCondition;
+    map["elevator"] = filterSettings.checkedElevator;
+    map["neighbourhood"] = filterSettings.currentNeighbourhood;
+    map["property_type"] = filterSettings.currentPropertyType;
+    map["room_type"] = filterSettings.currentRoomType;
+
+    var jsonData = jsonEncode(map);
+
+    final url = 'http://localhost:5000/api/pricePrediction';
+    try {
+      final response = await http.post(
+        Uri.parse(url),
+        headers: {
+          "content-type": "application/json",
+        },
+        body: jsonData,
+      );
+      //Predicted price
+      final Map<String, dynamic> responseData = json.decode(response.body);
+      if (responseData == null) {
+        return;
+      }
+      _predictedPrice = responseData["price"];
+      print("Price: " + _predictedPrice);
+    } catch (error) {
+      debugPrint(error.toString());
+      return;
+    }
+  }
+
+  Future<void> predictPriceParams() async {
+    final url = 'http://localhost:5000/api/pricePredictionParamValues';
+    try {
+      final response = await http.get(
+        Uri.parse(url),
+        headers: {
+          "content-type": "application/json",
+        },
+      ).timeout(Duration(seconds: 6));
+      final Map<String, dynamic> responseData = json.decode(response.body);
+      if (responseData == null) {
+        return;
+      }
+      var neighbourhood = responseData["neighbourhood"];
+      var neighbourhoodListCleansed = neighbourhood["values"];
+      neighbourhoodListCleansed.forEach((element) {
+        _neighbourhoodCleansed.add(element);
+      });
+      print(responseData);
+    } catch (error) {
+      debugPrint(error.toString());
+    }
+  }
+
+  //Draw Polygon to the map
+/*  void _setPolygon() {
+    final String polygonIdVal = "";
+    _polygons.add(Polygon(
+      polygonId: PolygonId(polygonIdVal)
+    ));
+  }
+  */
 }
