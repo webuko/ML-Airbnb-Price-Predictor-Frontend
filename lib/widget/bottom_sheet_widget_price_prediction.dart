@@ -1,4 +1,4 @@
-import 'package:airbnb/api/flatProvider.dart';
+import 'package:airbnb/api/flat_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
@@ -144,7 +144,7 @@ class _BottomSheetWidgetPricePredictionState
           },
           validator: (value) {
             if (value != null && value.isEmpty) {
-              return 'Please select a property type!';
+              return 'Please select a room type!';
             } else if (!myFlatProvider.allRoomTypes.contains(value)) {
               return 'Please select a existing room type!';
             } else {
@@ -169,7 +169,7 @@ class _BottomSheetWidgetPricePredictionState
           },
           validator: (value) {
             if (value != null && value.isEmpty) {
-              return 'Please select a property type!';
+              return 'Please select a neighbourhood!';
             } else if (!myFlatProvider.allNeighbourhoodCleansed
                 .contains(value)) {
               return 'Please select a existing neighbourhood!';
@@ -187,38 +187,37 @@ class _BottomSheetWidgetPricePredictionState
         key: formKey,
         child: ListView(
           children: <Widget>[
-            (myFlatProvider.predictedPrice == "")
-                ? Container(
-                    height: 50,
-                    alignment: Alignment.center,
-                    child: Text(
-                      "Price Prediciton",
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 22,
-                      ),
-                    ),
-                  )
-                : Container(
-                    height: 50,
-                    alignment: Alignment.center,
-                    child: Text(
-                      "The predicted price is: " +
-                          myFlatProvider.predictedPrice +
-                          "€",
-                      style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 22,
-                          color: Theme.of(context).primaryColor),
-                    ),
+            if (myFlatProvider.predictedPrice == "")
+              Container(
+                height: 50,
+                alignment: Alignment.center,
+                child: const Text(
+                  "Price Prediciton",
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 22,
                   ),
+                ),
+              )
+            else
+              Container(
+                height: 50,
+                alignment: Alignment.center,
+                child: Text(
+                  "The predicted price is: ${myFlatProvider.predictedPrice}€",
+                  style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 22,
+                      color: Theme.of(context).primaryColor),
+                ),
+              ),
             Container(
               height: 60,
               child: Row(
                 children: [
                   Container(
                     width: 200,
-                    child: Text("Accommondates"),
+                    child: const Text("Accommondates"),
                   ),
                   Expanded(
                     child: TextFormField(
@@ -248,7 +247,7 @@ class _BottomSheetWidgetPricePredictionState
                 children: [
                   Container(
                     width: 200,
-                    child: Text("Bathrooms"),
+                    child: const Text("Bathrooms"),
                   ),
                   Expanded(
                     child: TextFormField(
@@ -278,7 +277,7 @@ class _BottomSheetWidgetPricePredictionState
                 children: [
                   Container(
                     width: 200,
-                    child: Text("Bedrooms"),
+                    child: const Text("Bedrooms"),
                   ),
                   Expanded(
                     child: TextFormField(
@@ -308,7 +307,7 @@ class _BottomSheetWidgetPricePredictionState
                 children: [
                   Container(
                     width: 200,
-                    child: Text("Guets Included"),
+                    child: const Text("Guets Included"),
                   ),
                   Expanded(
                     child: TextFormField(
@@ -338,7 +337,7 @@ class _BottomSheetWidgetPricePredictionState
                 children: [
                   Container(
                     width: 200,
-                    child: Text("Property Type"),
+                    child: const Text("Property Type"),
                   ),
                   Expanded(
                     child: buildPropertyType(),
@@ -352,7 +351,7 @@ class _BottomSheetWidgetPricePredictionState
                 children: [
                   Container(
                     width: 200,
-                    child: Text("Room Type"),
+                    child: const Text("Room Type"),
                   ),
                   Expanded(
                     child: buildRoomType(),
@@ -366,7 +365,7 @@ class _BottomSheetWidgetPricePredictionState
                 children: [
                   Container(
                     width: 200,
-                    child: Text("Neighbourhood"),
+                    child: const Text("Neighbourhood"),
                   ),
                   Expanded(
                     child: buildNeighbourhoodType(),
@@ -380,14 +379,14 @@ class _BottomSheetWidgetPricePredictionState
                 children: [
                   Container(
                     width: 200,
-                    child: Text("Air Conditioning"),
+                    child: const Text("Air Conditioning"),
                   ),
                   Expanded(
                     child: Checkbox(
-                      value: this.filterSettings._checkedAirCondition,
+                      value: filterSettings._checkedAirCondition,
                       onChanged: (value) {
                         setState(() {
-                          this.filterSettings._checkedAirCondition = value!;
+                          filterSettings._checkedAirCondition = value!;
                         });
                       },
                     ),
@@ -405,10 +404,10 @@ class _BottomSheetWidgetPricePredictionState
                   ),
                   Expanded(
                     child: Checkbox(
-                      value: this.filterSettings._checkedElevator,
+                      value: filterSettings._checkedElevator,
                       onChanged: (value) {
                         setState(() {
-                          this.filterSettings._checkedElevator = value!;
+                          filterSettings._checkedElevator = value!;
                         });
                       },
                     ),
@@ -422,14 +421,14 @@ class _BottomSheetWidgetPricePredictionState
                 children: [
                   Container(
                     width: 200,
-                    child: Text("Gymnastic Available?"),
+                    child: const Text("Gymnastic Available?"),
                   ),
                   Expanded(
                     child: Checkbox(
-                      value: this.filterSettings._checkedGym,
+                      value: filterSettings._checkedGym,
                       onChanged: (value) {
                         setState(() {
-                          this.filterSettings._checkedGym = value!;
+                          filterSettings._checkedGym = value!;
                         });
                       },
                     ),
@@ -437,11 +436,10 @@ class _BottomSheetWidgetPricePredictionState
                 ],
               ),
             ),
-            SizedBox(
+            const SizedBox(
               height: 20,
             ),
             ElevatedButton(
-              child: Text('Save'),
               onPressed: () => {
                 if (formKey.currentState!.validate())
                   {
@@ -449,6 +447,7 @@ class _BottomSheetWidgetPricePredictionState
                     _submit(filterSettings, myFlatProvider)
                   }
               },
+              child: const Text('Save'),
             ),
           ],
         ),
