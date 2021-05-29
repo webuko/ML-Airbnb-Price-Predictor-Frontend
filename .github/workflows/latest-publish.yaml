@@ -1,10 +1,10 @@
-name: snapshot-publish
+name: latest-publish
 
 on:
-  workflow_dispatch:
-  push:
+  pull_request:
     branches:
-      - develop
+      - main
+    types: [ closed ]
 
 jobs:
   flutter:
@@ -30,7 +30,7 @@ jobs:
           context: .
           file: Dockerfile
           push: true
-          tags: ${{ secrets.DOCKER_HUB_ORGANIZATIONNAME }}/frontend:snapshot
+          tags: ${{ secrets.DOCKER_HUB_ORGANIZATIONNAME }}/frontend:latest
 
       - name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
