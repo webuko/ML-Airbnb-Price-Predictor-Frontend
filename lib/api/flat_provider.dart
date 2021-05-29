@@ -1,14 +1,19 @@
 import 'dart:collection';
+import 'dart:math';
+import 'dart:typed_data';
 
+import 'package:airbnb/gist/Gist.dart';
 import 'package:airbnb/models/place.dart';
 import 'package:airbnb/models/polygon_neighbourhood.dart';
 import 'package:airbnb/screens/flat_detail_screen.dart';
 import 'package:airbnb/widget/bottom_sheet_widget_filter.dart';
 import 'package:airbnb/widget/bottom_sheet_widget_price_prediction.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:characters/characters.dart';
 
 class FlatProvider with ChangeNotifier {
   List<Flat> _flats = [];
@@ -27,6 +32,8 @@ class FlatProvider with ChangeNotifier {
   //Maps
   BitmapDescriptor mapMarker = BitmapDescriptor.defaultMarker;
   List<Marker> _markers = [];
+//Neighbourhoods markers
+  List<Marker> _neighbourhoodMarkers = [];
 
   Set<Polygon> _polygons = HashSet<Polygon>();
   int _polygonIdCounter = 1;
@@ -73,8 +80,12 @@ class FlatProvider with ChangeNotifier {
     return List.from(_neighbourhoodCleansed);
   }
 
-  List<Marker> get allMarkers {
-    return List.from(_markers);
+  Set<Marker> get allMarkers {
+    return Set.from(_markers);
+  }
+
+  Set<Marker> get allNeighbourhoodMarkers {
+    return Set.from(_neighbourhoodMarkers);
   }
 
   Flat getLocation(int i) {
@@ -84,7 +95,9 @@ class FlatProvider with ChangeNotifier {
   Future setMarkers() async {
     final mapMarker = await BitmapDescriptor.fromAssetImage(
         const ImageConfiguration(
-            size: Size(35, 52), locale: Locale('de', 'CH')),
+          size: Size(30, 45),
+          locale: Locale('de', 'CH'),
+        ),
         'assets/marker.png');
     _markers = [];
     for (final element in _flats) {
@@ -109,6 +122,22 @@ class FlatProvider with ChangeNotifier {
     }
     _isLoading = false;
     notifyListeners();
+  }
+
+  List<Marker> setNeighbourhoodMarkers(List<Uint8List> bitmaps) {
+    List<Marker> markersList = [];
+    BitmapDescriptor mapMarker = BitmapDescriptor.defaultMarker;
+    bitmaps.asMap().forEach((i, bmp) {
+      markersList.add(Marker(
+          markerId: MarkerId(_polygonNeighbourhood[i].neighbourhood.toString()),
+          position: LatLng(
+            _polygonNeighbourhood[i].avgLatLng!.latitude,
+            _polygonNeighbourhood[i].avgLatLng!.longitude,
+          ),
+          //infoWindow: InfoWindow(title: element.name),
+          icon: BitmapDescriptor.fromBytes(bmp)));
+    });
+    return markersList;
   }
 
   Future<void> allListings(ctx) async {
@@ -365,7 +394,6 @@ class FlatProvider with ChangeNotifier {
       neighbourhoodListCleansed.forEach((element) {
         _neighbourhoodCleansed.add(element);
       });
-      print(responseData);
     } catch (error) {
       debugPrint(error.toString());
     }
@@ -429,6 +457,7 @@ class FlatProvider with ChangeNotifier {
       } else {
         color = Colors.limeAccent;
       }
+      element.avgLatLng = computeCentroid(polygonLatLngs);
       _polygons.add(
         Polygon(
             polygonId: PolygonId(polygonIdVal),
@@ -438,5 +467,68 @@ class FlatProvider with ChangeNotifier {
             fillColor: color.withOpacity(0.15)),
       );
     }
+    //The Labels for the maps are generated
+    MarkerGenerator(markerWidgets(), (bitmaps) {
+      _neighbourhoodMarkers = setNeighbourhoodMarkers(bitmaps);
+    }).generate(_context);
+  }
+
+  //Method used to get the Label Widgets for the neigbourhoods
+  List<Widget> markerWidgets() {
+    return _polygonNeighbourhood
+        .map((c) =>
+            _getMarkerWidget(c.neighbourhood.toString(), c.avgPrice.toString()))
+        .toList();
+  }
+
+  //Method used to get a roughly visual center of the neigbourhood
+  LatLng computeCentroid(List<LatLng> points) {
+    double latitude = 0;
+    double longitude = 0;
+    int n = points.length;
+
+    for (LatLng point in points) {
+      latitude += point.latitude;
+      longitude += point.longitude;
+    }
+    return new LatLng(latitude / n, longitude / n);
+  }
+
+  // Marker widget used to display the neighbourhoods label and its average price
+  Widget _getMarkerWidget(String name, String avgPrice) {
+    double temp = double.parse(avgPrice);
+    var temp2 = roundDouble(temp, 2);
+    String resultAvgPrice = temp2.toString();
+    return Container(
+        height: 30,
+        padding: EdgeInsets.symmetric(horizontal: 0, vertical: 0),
+        child: Container(
+          padding: EdgeInsets.symmetric(horizontal: 3, vertical: 1.5),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(color: Colors.black, width: 1),
+            color: Colors.white,
+            shape: BoxShape.rectangle,
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                '${name}',
+                style: TextStyle(fontSize: 8, color: Colors.black),
+              ),
+              Text(
+                'Ø Price = ${resultAvgPrice} €',
+                style: TextStyle(fontSize: 8, color: Colors.black),
+              )
+            ],
+          ),
+        ));
+  }
+
+  //Round a double to 2 digits.
+  double roundDouble(double value, int places) {
+    num mod = pow(10.0, places);
+    return ((value * mod).round().toDouble() / mod);
   }
 }

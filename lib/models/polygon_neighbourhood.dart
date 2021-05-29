@@ -4,6 +4,8 @@
 
 import 'dart:convert';
 
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+
 //How to convert into json
 List<PolygonNeighbourhood> welcomeFromJson(String str) =>
     List<PolygonNeighbourhood>.from(
@@ -15,12 +17,14 @@ String welcomeToJson(List<PolygonNeighbourhood> data) =>
 class PolygonNeighbourhood {
   PolygonNeighbourhood({
     this.avgPrice,
+    this.avgLatLng,
     this.neighbourhood,
     this.relAvgPrice,
     this.geometry,
   });
 
   double? avgPrice;
+  LatLng? avgLatLng;
   String? neighbourhood;
   double? relAvgPrice;
   Geometry? geometry;

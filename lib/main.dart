@@ -1,8 +1,8 @@
+import 'package:airbnb/api/neigbourhood_provider.dart';
 import 'package:airbnb/screens/home_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:url_strategy/url_strategy.dart';
-
 import 'api/flat_provider.dart';
 
 void main() {
@@ -27,6 +27,9 @@ class _MyAppState extends State<MyApp> {
       providers: [
         ChangeNotifierProvider(
           create: (_) => FlatProvider(),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => NeighbourhoodProvider(),
         ),
       ],
       child: MaterialApp(

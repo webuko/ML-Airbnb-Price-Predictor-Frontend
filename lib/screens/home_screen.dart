@@ -1,9 +1,13 @@
 import 'dart:async';
+import 'dart:typed_data';
+import 'package:airbnb/api/neigbourhood_provider.dart';
+import 'package:airbnb/gist/Gist.dart';
 import 'package:airbnb/widget/bottom_sheet_widget_filter.dart';
 import 'package:airbnb/widget/bottom_sheet_widget_price_prediction.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:pointer_interceptor/pointer_interceptor.dart';
 import 'package:provider/provider.dart';
@@ -22,6 +26,9 @@ class _HomeScreenState extends State<HomeScreen> {
   bool _showBottomSheetFiltering = false;
   bool _showBottomSheetPricePrediction = false;
   bool _showFloatingActionButton = false;
+
+  bool _showFlatMarkers = true;
+  bool _showNeighbourhoodMarkers = true;
 
   @override
   initState() {
@@ -50,8 +57,8 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future _fetchAvgPricePerNeighbourhood() async {
-    await Provider.of<FlatProvider>(context, listen: false)
-        .avgPricePerNeighbourhood();
+    await Provider.of<NeighbourhoodProvider>(context, listen: false)
+        .avgPricePerNeighbourhood(context);
   }
 
   @override
@@ -130,20 +137,50 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
         appBar: AppBar(actions: <Widget>[
-          IconButton(
-            icon: const Icon(Icons.access_alarm),
-            onPressed: () {},
-          ),
-          IconButton(
-            icon: const Icon(Icons.access_alarm),
-            onPressed: () {},
-          ),
+          (_showNeighbourhoodMarkers)
+              ? IconButton(
+                  icon: const Icon(Icons.visibility_off),
+                  onPressed: () {
+                    setState(() {
+                      _showNeighbourhoodMarkers = !_showNeighbourhoodMarkers;
+                    });
+                  },
+                )
+              : IconButton(
+                  icon: const Icon(Icons.visibility),
+                  onPressed: () {
+                    setState(() {
+                      _showNeighbourhoodMarkers = !_showNeighbourhoodMarkers;
+                    });
+                  },
+                ),
+          (_showFlatMarkers)
+              ? IconButton(
+                  icon: const Icon(Icons.location_off),
+                  onPressed: () {
+                    setState(() {
+                      _showFlatMarkers = !_showFlatMarkers;
+                    });
+                  },
+                )
+              : IconButton(
+                  icon: const Icon(Icons.location_on),
+                  onPressed: () {
+                    setState(() {
+                      _showFlatMarkers = !_showFlatMarkers;
+                    });
+                  },
+                ),
         ]),
         body: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             Expanded(
-              child: MyGoogleMapWidget(myFlatProvider.isDrawerOpen),
+              child: MyGoogleMapWidget(
+                drawerActive: myFlatProvider.isDrawerOpen,
+                showFlatMarkers: _showFlatMarkers,
+                showNeighbourhoodMarkers: _showNeighbourhoodMarkers,
+              ),
             ),
             SizedBox(
               height: (_showBottomSheetFiltering == true)
@@ -172,30 +209,49 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: const Icon(Icons.close),
               )
             : null,
-        //floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
       );
     }
   }
 }
 
-class MyGoogleMapWidget extends StatelessWidget {
+class MyGoogleMapWidget extends StatefulWidget {
   //MyGoogleMapWidget
-  MyGoogleMapWidget(this._drawerActive);
+  MyGoogleMapWidget({
+    required this.drawerActive,
+    required this.showFlatMarkers,
+    required this.showNeighbourhoodMarkers,
+  });
 
-  final bool _drawerActive;
+  final bool drawerActive;
+  final bool showFlatMarkers;
+  final bool showNeighbourhoodMarkers;
+
+  @override
+  _MyGoogleMapWidgetState createState() => _MyGoogleMapWidgetState();
+}
+
+class _MyGoogleMapWidgetState extends State<MyGoogleMapWidget> {
   final Completer<GoogleMapController> _controller = Completer();
 
   @override
   Widget build(BuildContext context) {
     final FlatProvider _myFlatProvider = context.watch<FlatProvider>();
+    final NeighbourhoodProvider _myNeighbourhoodProvider =
+        context.watch<NeighbourhoodProvider>();
+
+    final Set<Marker> empty = {};
+    final Set<Marker> all = {};
+    all.addAll(_myFlatProvider.allMarkers);
+    all.addAll(_myNeighbourhoodProvider.allNeighbourhoodMarkers);
+
     if (_myFlatProvider.isLoading == true) {
       return const Center(
         child: CircularProgressIndicator(),
       );
     } else {
       return GoogleMap(
-        polygons: _myFlatProvider.getPolygons,
-        scrollGesturesEnabled: _drawerActive == true ? false : true,
+        polygons: _myNeighbourhoodProvider.getPolygons,
+        scrollGesturesEnabled: widget.drawerActive == true ? false : true,
         mapType: MapType.normal,
         initialCameraPosition: const CameraPosition(
           target: LatLng(
@@ -207,7 +263,17 @@ class MyGoogleMapWidget extends StatelessWidget {
         onMapCreated: (GoogleMapController controller) {
           _controller.complete(controller);
         },
-        markers: Set.from(_myFlatProvider.allMarkers),
+        markers: (() {
+          if (widget.showFlatMarkers && widget.showNeighbourhoodMarkers) {
+            return all;
+          } else if (widget.showFlatMarkers) {
+            return _myFlatProvider.allMarkers;
+          } else if (widget.showNeighbourhoodMarkers) {
+            return _myNeighbourhoodProvider.allNeighbourhoodMarkers;
+          } else {
+            return empty;
+          }
+        }()),
         gestureRecognizers: {
           Factory<OneSequenceGestureRecognizer>(() => ScaleGestureRecognizer()),
         },
