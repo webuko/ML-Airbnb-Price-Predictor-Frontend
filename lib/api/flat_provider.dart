@@ -1,4 +1,7 @@
+import 'dart:collection';
+
 import 'package:airbnb/models/place.dart';
+import 'package:airbnb/models/polygon_neighbourhood.dart';
 import 'package:airbnb/screens/flat_detail_screen.dart';
 import 'package:airbnb/widget/bottom_sheet_widget_filter.dart';
 import 'package:airbnb/widget/bottom_sheet_widget_price_prediction.dart';
@@ -9,25 +12,29 @@ import 'dart:convert';
 
 class FlatProvider with ChangeNotifier {
   List<Flat> _flats = [];
+  List<PolygonNeighbourhood> _polygonNeighbourhood = [];
   bool _drawerActive = false;
   bool _isLoading = false;
   var _context;
 
   //Flat attributes
-  List<String> _roomType = [];
-  List<String> _propertyType = [];
-  List<String> _neighbourhood = [];
-  List<String> _neighbourhoodCleansed = [];
+  final List<String> _roomType = [];
+  final List<String> _propertyType = [];
+  final List<String> _neighbourhood = [];
+  final List<String> _neighbourhoodCleansed = [];
   String _predictedPrice = "";
 
   //Maps
   BitmapDescriptor mapMarker = BitmapDescriptor.defaultMarker;
   List<Marker> _markers = [];
-  /*
+
   Set<Polygon> _polygons = HashSet<Polygon>();
   int _polygonIdCounter = 1;
   bool _isPolygon = true; //Default
-  */
+
+  Set<Polygon> get getPolygons {
+    return _polygons;
+  }
 
   //getters
   bool get isLoading {
@@ -70,18 +77,18 @@ class FlatProvider with ChangeNotifier {
     return List.from(_markers);
   }
 
-  getlocation(int i) {
+  Flat getLocation(int i) {
     return _flats[i];
   }
 
-  void setMarkers() async {
-    var temp = await BitmapDescriptor.fromAssetImage(
-        ImageConfiguration(size: Size(35, 52), locale: Locale('de', 'CH')),
+  Future setMarkers() async {
+    final mapMarker = await BitmapDescriptor.fromAssetImage(
+        const ImageConfiguration(
+            size: Size(35, 52), locale: Locale('de', 'CH')),
         'assets/marker.png');
-    mapMarker = temp;
     _markers = [];
-    _flats.forEach((element) {
-      _markers.add(new Marker(
+    for (final element in _flats) {
+      _markers.add(Marker(
         markerId: MarkerId(element.id.toString()),
         position: LatLng(
           element.latitude,
@@ -99,7 +106,7 @@ class FlatProvider with ChangeNotifier {
             }
         },
       ));
-    });
+    }
     _isLoading = false;
     notifyListeners();
   }
@@ -108,7 +115,7 @@ class FlatProvider with ChangeNotifier {
     _context = ctx;
     _isLoading = true;
     // notifyListeners();
-    final url = 'http://localhost:5000/api/allListings';
+    const url = 'http://localhost:5000/api/allListings';
     try {
       final response = await http.get(
         Uri.parse(url),
@@ -174,8 +181,7 @@ class FlatProvider with ChangeNotifier {
   Future<void> filterListings(FilterSettings filterSettings) async {
     _isLoading = true;
     // notifyListeners();
-    Map<String, dynamic> data = {};
-    print(data.isEmpty);
+    final Map<String, dynamic> data = {};
 
     Map<String, dynamic> _price;
     if (filterSettings.priceChecked == true) {
@@ -250,13 +256,13 @@ class FlatProvider with ChangeNotifier {
     Map<String, dynamic> finalData = {};
 
     if (data.isEmpty) {
-      Map<String, dynamic> _emptyFilter = {'criteria': {}};
+      final Map<String, dynamic> _emptyFilter = {'criteria': {}};
       finalData.addAll(_emptyFilter);
     } else {
       finalData = {'criteria': data};
     }
 
-    final url = 'http://localhost:5000/api/filterListings';
+    const url = 'http://localhost:5000/api/filterListings';
     try {
       final response = await http.post(
         Uri.parse(url),
@@ -305,7 +311,7 @@ class FlatProvider with ChangeNotifier {
 
   Future<void> predictPrice(FilterSettingsPredictPrice filterSettings) async {
     // notifyListeners();
-    var map = Map<String, dynamic>();
+    final map = <String, dynamic>{};
     map["bathrooms"] = filterSettings.currentBathrooms;
     map["bedrooms"] = filterSettings.currentBedrooms;
     map["accommodates"] = filterSettings.currentAccommodates;
@@ -317,9 +323,9 @@ class FlatProvider with ChangeNotifier {
     map["property_type"] = filterSettings.currentPropertyType;
     map["room_type"] = filterSettings.currentRoomType;
 
-    var jsonData = jsonEncode(map);
+    final jsonData = jsonEncode(map);
 
-    final url = 'http://localhost:5000/api/pricePrediction';
+    const url = 'http://localhost:5000/api/pricePrediction';
     try {
       final response = await http.post(
         Uri.parse(url),
@@ -342,20 +348,20 @@ class FlatProvider with ChangeNotifier {
   }
 
   Future<void> predictPriceParams() async {
-    final url = 'http://localhost:5000/api/pricePredictionParamValues';
+    const url = 'http://localhost:5000/api/pricePredictionParamValues';
     try {
       final response = await http.get(
         Uri.parse(url),
         headers: {
           "content-type": "application/json",
         },
-      ).timeout(Duration(seconds: 6));
+      );
       final Map<String, dynamic> responseData = json.decode(response.body);
       if (responseData == null) {
         return;
       }
-      var neighbourhood = responseData["neighbourhood"];
-      var neighbourhoodListCleansed = neighbourhood["values"];
+      final neighbourhood = responseData["neighbourhood"];
+      final neighbourhoodListCleansed = neighbourhood["values"];
       neighbourhoodListCleansed.forEach((element) {
         _neighbourhoodCleansed.add(element);
       });
@@ -365,12 +371,72 @@ class FlatProvider with ChangeNotifier {
     }
   }
 
-  //Draw Polygon to the map
-/*  void _setPolygon() {
-    final String polygonIdVal = "";
-    _polygons.add(Polygon(
-      polygonId: PolygonId(polygonIdVal)
-    ));
+  Future<void> avgPricePerNeighbourhood() async {
+    const url = 'http://localhost:5000/api/avgPricePerNeighbourhood';
+    try {
+      final response = await http.get(
+        Uri.parse(url),
+        headers: {
+          "content-type": "application/json",
+        },
+      );
+      final welcome = welcomeFromJson(response.body);
+      if (welcome == null) {
+        return;
+      }
+      _polygonNeighbourhood = welcome;
+      _setPolygon();
+    } catch (error) {
+      debugPrint(error.toString());
+    }
   }
-  */
+
+  List<PolygonNeighbourhood> welcomeFromJson(String str) =>
+      List<PolygonNeighbourhood>.from(
+          json.decode(str).map((x) => PolygonNeighbourhood.fromJson(x)));
+
+  //Draw Polygon to the map
+  void _setPolygon() {
+    for (PolygonNeighbourhood element in _polygonNeighbourhood) {
+      Color color = Colors.red;
+      final String polygonIdVal = element.neighbourhood.toString();
+      List<LatLng> polygonLatLngs = [];
+      for (var i = 0; element.geometry!.coordinates![0][0].length > i; i++) {
+        LatLng latLng = LatLng(
+          element.geometry!.coordinates![0][0][i][1],
+          element.geometry!.coordinates![0][0][i][0],
+        );
+        polygonLatLngs.add(latLng);
+      }
+      if (element.relAvgPrice! > 0 && element.relAvgPrice! < 0.1) {
+        color = Colors.blue;
+      } else if (element.relAvgPrice! > 0.1 && element.relAvgPrice! < 0.2) {
+        color = Colors.green;
+      } else if (element.relAvgPrice! > 0.2 && element.relAvgPrice! < 0.3) {
+        color = Colors.red;
+      } else if (element.relAvgPrice! > 0.3 && element.relAvgPrice! < 0.4) {
+        color = Colors.teal;
+      } else if (element.relAvgPrice! > 0.4 && element.relAvgPrice! < 0.5) {
+        color = Colors.amber;
+      } else if (element.relAvgPrice! > 0.5 && element.relAvgPrice! < 0.6) {
+        color = Colors.pink;
+      } else if (element.relAvgPrice! > 0.6 && element.relAvgPrice! < 0.7) {
+        color = Colors.purple;
+      } else if (element.relAvgPrice! > 0.7 && element.relAvgPrice! < 0.8) {
+        color = Colors.orange;
+      } else if (element.relAvgPrice! > 0.8 && element.relAvgPrice! < 0.9) {
+        color = Colors.indigo;
+      } else {
+        color = Colors.limeAccent;
+      }
+      _polygons.add(
+        Polygon(
+            polygonId: PolygonId(polygonIdVal),
+            points: polygonLatLngs,
+            strokeWidth: 2,
+            strokeColor: color,
+            fillColor: color.withOpacity(0.15)),
+      );
+    }
+  }
 }

@@ -150,7 +150,7 @@ class _FlatDetailcreenState extends State<FlatDetailScreen> {
                       ),
                     ],
                   ),
-                  SizedBox(
+                  const SizedBox(
                     height: 10,
                   ),
                   Row(
@@ -213,29 +213,6 @@ class _FlatDetailcreenState extends State<FlatDetailScreen> {
                       ],
                     ),
                   ),
-                  /*Row(
-                    children: <Widget>[
-                      Expanded(
-                        child: Padding(
-                          padding: const EdgeInsets.only(bottom: 10.0),
-                          child: Text(
-                            "Check in: After 3pm",
-                            style: TextStyle(
-                                color: Colors.black54, fontSize: 16.0),
-                          ),
-                        ),
-                      ),
-                      Padding(
-                        padding:
-                            const EdgeInsets.only(bottom: 10.0, right: 10.0),
-                        child: Text(
-                          "Check Out:11am",
-                          style:
-                              TextStyle(color: Colors.black54, fontSize: 16.0),
-                        ),
-                      ),
-                    ],
-                  ), */
                   SizedBox(
                       height: 100.0,
                       child:
