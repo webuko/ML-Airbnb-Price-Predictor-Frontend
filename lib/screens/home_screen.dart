@@ -23,7 +23,7 @@ class _HomeScreenState extends State<HomeScreen> {
   bool _showBottomSheetFiltering = false;
   bool _showBottomSheetPricePrediction = false;
   bool _showFloatingActionButton = false;
-  bool _showFlatMarkers = true;
+  bool _showFlatMarkers = false;
   bool _showNeighbourhoodMarkers = true;
 
   @override
@@ -134,7 +134,7 @@ class _HomeScreenState extends State<HomeScreen> {
         appBar: AppBar(actions: <Widget>[
           (_showNeighbourhoodMarkers)
               ? IconButton(
-                  icon: const Icon(Icons.visibility_off),
+                  icon: const Icon(Icons.visibility),
                   onPressed: () {
                     setState(() {
                       _showNeighbourhoodMarkers = !_showNeighbourhoodMarkers;
@@ -142,7 +142,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   },
                 )
               : IconButton(
-                  icon: const Icon(Icons.visibility),
+                  icon: const Icon(Icons.visibility_off),
                   onPressed: () {
                     setState(() {
                       _showNeighbourhoodMarkers = !_showNeighbourhoodMarkers;
@@ -151,7 +151,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
           (_showFlatMarkers)
               ? IconButton(
-                  icon: const Icon(Icons.location_off),
+                  icon: const Icon(Icons.location_on),
                   onPressed: () {
                     setState(() {
                       _showFlatMarkers = !_showFlatMarkers;
@@ -159,7 +159,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   },
                 )
               : IconButton(
-                  icon: const Icon(Icons.location_on),
+                  icon: const Icon(Icons.location_off),
                   onPressed: () {
                     setState(() {
                       _showFlatMarkers = !_showFlatMarkers;
