@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'dart:math';
 import 'dart:typed_data';
 
-import 'package:airbnb/gist/Gist.dart';
+import 'package:airbnb/gist/gist.dart';
 import 'package:airbnb/models/polygon_neighbourhood.dart';
 import 'package:airbnb/widget/bottom_sheet_widget_filter.dart';
 import 'package:flutter/material.dart';
@@ -16,10 +16,10 @@ class NeighbourhoodProvider with ChangeNotifier {
 
   //Maps
   BitmapDescriptor mapMarker = BitmapDescriptor.defaultMarker;
+
   //Neighbourhoods markers
   List<Marker> _neighbourhoodMarkers = [];
   Set<Polygon> _polygons = HashSet<Polygon>();
-
   Set<Polygon> get getPolygons {
     return _polygons;
   }
@@ -81,7 +81,6 @@ class NeighbourhoodProvider with ChangeNotifier {
       _propertyType = {
         'property_type': [filterSettings.propertyType],
       };
-      //data.addAll(_propertyType);
       data.addAll(_propertyType);
     }
 
@@ -90,7 +89,6 @@ class NeighbourhoodProvider with ChangeNotifier {
       _roomType = {
         'room_type': [filterSettings.roomType],
       };
-      //data.addAll(_roomType);
       data.addAll(_roomType);
     }
 
@@ -125,6 +123,7 @@ class NeighbourhoodProvider with ChangeNotifier {
       }
       _polygonNeighbourhood = responseData;
       _setPolygon();
+      notifyListeners();
     } catch (error) {
       debugPrint(error.toString());
     }
@@ -160,6 +159,7 @@ class NeighbourhoodProvider with ChangeNotifier {
 
   //Draw Polygon to the Map
   void _setPolygon() {
+    _polygons = {};
     for (PolygonNeighbourhood element in _polygonNeighbourhood) {
       Color color = Colors.red;
       final String polygonIdVal = element.neighbourhood.toString();
@@ -207,6 +207,7 @@ class NeighbourhoodProvider with ChangeNotifier {
     //The Labels for the maps are generated
     MarkerGenerator(markerWidgets(), (bitmaps) {
       _neighbourhoodMarkers = setNeighbourhoodMarkers(bitmaps);
+      notifyListeners();
     }).generate(_context);
   }
 
@@ -270,7 +271,7 @@ class NeighbourhoodProvider with ChangeNotifier {
                 style: TextStyle(fontSize: 8, color: Colors.black),
               ),
               Text(
-                'Ø Price = ${resultAvgPrice} €',
+                'Ø Price = \$${resultAvgPrice}',
                 style: TextStyle(fontSize: 8, color: Colors.black),
               )
             ],

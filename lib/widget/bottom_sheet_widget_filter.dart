@@ -243,7 +243,7 @@ class _BottomSheetWidgetFilteringState
                   Container(
                     width: 80,
                     child: Text(
-                      "(${filterSettings._currentRangeValuesPrice.start.round()}€ - ${filterSettings._currentRangeValuesPrice.end.round()}€)",
+                      "(\$${filterSettings._currentRangeValuesPrice.start.round()} - \$${filterSettings._currentRangeValuesPrice.end.round()})",
                       textAlign: TextAlign.center,
                     ),
                   ),

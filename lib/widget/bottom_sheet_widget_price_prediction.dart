@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:airbnb/api/flat_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -204,7 +206,7 @@ class _BottomSheetWidgetPricePredictionState
                 height: 50,
                 alignment: Alignment.center,
                 child: Text(
-                  "The predicted price is: ${myFlatProvider.predictedPrice}€",
+                  "The predicted price is: \$${(roundDouble(double.parse(myFlatProvider.predictedPrice), 2)).toString()}",
                   style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 22,
@@ -453,6 +455,12 @@ class _BottomSheetWidgetPricePredictionState
         ),
       ),
     );
+  }
+
+  //Round a double to 2 digits.
+  double roundDouble(double value, int places) {
+    num mod = pow(10.0, places);
+    return ((value * mod).round().toDouble() / mod);
   }
 
   Future<void> _submit(

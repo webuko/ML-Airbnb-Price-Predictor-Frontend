@@ -1,6 +1,5 @@
 import 'package:airbnb/models/flat.dart';
 import 'package:flutter/material.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class FlatDetailScreen extends StatefulWidget {
   final Flat element;
@@ -13,10 +12,7 @@ class FlatDetailScreen extends StatefulWidget {
 
 class _FlatDetailcreenState extends State<FlatDetailScreen> {
   Flat element;
-
   _FlatDetailcreenState(this.element);
-
-  late GoogleMapController mapController;
 
   @override
   Widget build(BuildContext flatScreenContext) {
@@ -102,7 +98,7 @@ class _FlatDetailcreenState extends State<FlatDetailScreen> {
                       Padding(
                         padding: const EdgeInsets.all(12.0),
                         child: Text(
-                          "Price: " + element.price.toString() + "€",
+                          "Price: \$" + element.price.toString(),
                           style: TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 25,
