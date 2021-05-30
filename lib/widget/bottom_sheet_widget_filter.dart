@@ -1,4 +1,4 @@
-import 'package:airbnb/api/flatProvider.dart';
+import 'package:airbnb/api/flat_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:provider/provider.dart';
@@ -160,7 +160,7 @@ class _BottomSheetWidgetFilteringState
           },
           validator: (value) {
             if (value != null && value.isEmpty) {
-              return 'Please select a property type!';
+              return 'Please select a room type!';
             } else if (!myFlatProvider.allRoomTypes.contains(value)) {
               return 'Please select a existing room type!';
             } else {
@@ -184,7 +184,7 @@ class _BottomSheetWidgetFilteringState
           },
           validator: (value) {
             if (value != null && value.isEmpty) {
-              return 'Please select a property type!';
+              return 'Please select a neighbourhood!';
             } else if (!myFlatProvider.allNeighbourhood.contains(value)) {
               return 'Please select a existing neighbourhood!';
             } else {
@@ -196,30 +196,29 @@ class _BottomSheetWidgetFilteringState
 
     return Container(
       width: MediaQuery.of(context).size.width,
-      padding: EdgeInsets.all(16),
+      padding: const EdgeInsets.all(16),
       child: ListView(
         children: <Widget>[
-          _isLoading == true
-              ? Container(
-                  height: 50,
-                  width: 50,
-                  child: Center(
-                    child: CircularProgressIndicator(),
-                  ),
-                )
-              : Container(
-                  alignment: Alignment.center,
-                  height: 50,
-                  child: Text(
-                    "Filter Listings (" +
-                        myFlatProvider.allFlats.length.toString() +
-                        " flats left)",
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 22,
-                    ),
-                  ),
+          if (_isLoading == true)
+            const SizedBox(
+              height: 50,
+              width: 50,
+              child: Center(
+                child: CircularProgressIndicator(),
+              ),
+            )
+          else
+            Container(
+              alignment: Alignment.center,
+              height: 50,
+              child: Text(
+                "Filter Listings (${myFlatProvider.allFlats.length} flats left)",
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 22,
                 ),
+              ),
+            ),
           Container(
             height: 50,
             child: Row(
@@ -234,49 +233,43 @@ class _BottomSheetWidgetFilteringState
                 ),
                 Container(
                   width: 100,
-                  child: Text("Price"),
+                  child: const Text("Price"),
                 ),
-                filterSettings._priceChecked == false
-                    ? Container()
-                    : Container(
-                        width: 80,
-                        child: Text(
-                          "(" +
-                              filterSettings._currentRangeValuesPrice.start
-                                  .round()
-                                  .toString() +
-                              "€ - " +
-                              filterSettings._currentRangeValuesPrice.end
-                                  .round()
-                                  .toString() +
-                              "€)",
-                          textAlign: TextAlign.center,
-                        ),
+                if (filterSettings._priceChecked == false)
+                  Container()
+                else
+                  Container(
+                    width: 80,
+                    child: Text(
+                      "(${filterSettings._currentRangeValuesPrice.start.round()}€ - ${filterSettings._currentRangeValuesPrice.end.round()}€)",
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                if (filterSettings._priceChecked == false)
+                  Container()
+                else
+                  Expanded(
+                    child: RangeSlider(
+                      values: filterSettings._currentRangeValuesPrice,
+                      min: 0,
+                      max: 1000,
+                      divisions: 1000,
+                      labels: RangeLabels(
+                        filterSettings._currentRangeValuesPrice.start
+                            .round()
+                            .toString(),
+                        filterSettings._currentRangeValuesPrice.end
+                            .round()
+                            .toString(),
                       ),
-                filterSettings._priceChecked == false
-                    ? Container()
-                    : Expanded(
-                        child: RangeSlider(
-                          values: filterSettings._currentRangeValuesPrice,
-                          min: 0,
-                          max: 1000,
-                          divisions: 1000,
-                          labels: RangeLabels(
-                            filterSettings._currentRangeValuesPrice.start
-                                .round()
-                                .toString(),
-                            filterSettings._currentRangeValuesPrice.end
-                                .round()
-                                .toString(),
-                          ),
-                          onChanged: (RangeValues values) {
-                            setState(() {
-                              filterSettings._currentRangeValuesPrice = values;
-                            });
-                            //  _submit(filterSettings, myFlatProvider);
-                          },
-                        ),
-                      )
+                      onChanged: (RangeValues values) {
+                        setState(() {
+                          filterSettings._currentRangeValuesPrice = values;
+                        });
+                        //  _submit(filterSettings, myFlatProvider);
+                      },
+                    ),
+                  )
               ],
             ),
           ),
@@ -296,47 +289,40 @@ class _BottomSheetWidgetFilteringState
                   width: 100,
                   child: Text("Bedrooms"),
                 ),
-                filterSettings._bedroomsChecked == false
-                    ? Container()
-                    : Container(
-                        width: 80,
-                        child: Text(
-                          "(" +
-                              filterSettings._currentRangeValuesBedrooms.start
-                                  .round()
-                                  .toString() +
-                              " - " +
-                              filterSettings._currentRangeValuesBedrooms.end
-                                  .round()
-                                  .toString() +
-                              ")",
-                          textAlign: TextAlign.center,
-                        ),
+                if (filterSettings._bedroomsChecked == false)
+                  Container()
+                else
+                  Container(
+                    width: 80,
+                    child: Text(
+                      "(${filterSettings._currentRangeValuesBedrooms.start.round()} - ${filterSettings._currentRangeValuesBedrooms.end.round()})",
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                if (filterSettings._bedroomsChecked == false)
+                  Container()
+                else
+                  Expanded(
+                    child: RangeSlider(
+                      values: filterSettings._currentRangeValuesBedrooms,
+                      min: 1,
+                      max: 10,
+                      divisions: 9,
+                      labels: RangeLabels(
+                        filterSettings._currentRangeValuesBedrooms.start
+                            .round()
+                            .toString(),
+                        filterSettings._currentRangeValuesBedrooms.end
+                            .round()
+                            .toString(),
                       ),
-                filterSettings._bedroomsChecked == false
-                    ? Container()
-                    : Expanded(
-                        child: RangeSlider(
-                          values: filterSettings._currentRangeValuesBedrooms,
-                          min: 1,
-                          max: 10,
-                          divisions: 9,
-                          labels: RangeLabels(
-                            filterSettings._currentRangeValuesBedrooms.start
-                                .round()
-                                .toString(),
-                            filterSettings._currentRangeValuesBedrooms.end
-                                .round()
-                                .toString(),
-                          ),
-                          onChanged: (RangeValues values) {
-                            setState(() {
-                              filterSettings._currentRangeValuesBedrooms =
-                                  values;
-                            });
-                          },
-                        ),
-                      )
+                      onChanged: (RangeValues values) {
+                        setState(() {
+                          filterSettings._currentRangeValuesBedrooms = values;
+                        });
+                      },
+                    ),
+                  )
               ],
             ),
           ),
@@ -354,49 +340,42 @@ class _BottomSheetWidgetFilteringState
                 ),
                 Container(
                   width: 100,
-                  child: Text("Bathrooms"),
+                  child: const Text("Bathrooms"),
                 ),
-                filterSettings._bathroomsChecked == false
-                    ? Container()
-                    : Container(
-                        width: 80,
-                        child: Text(
-                          "(" +
-                              filterSettings._currentRangeValuesBathrooms.start
-                                  .round()
-                                  .toString() +
-                              " - " +
-                              filterSettings._currentRangeValuesBathrooms.end
-                                  .round()
-                                  .toString() +
-                              ")",
-                          textAlign: TextAlign.center,
-                        ),
+                if (filterSettings._bathroomsChecked == false)
+                  Container()
+                else
+                  Container(
+                    width: 80,
+                    child: Text(
+                      "(${filterSettings._currentRangeValuesBathrooms.start.round()} - ${filterSettings._currentRangeValuesBathrooms.end.round()})",
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                if (filterSettings._bathroomsChecked == false)
+                  Container()
+                else
+                  Expanded(
+                    child: RangeSlider(
+                      values: filterSettings._currentRangeValuesBathrooms,
+                      min: 1,
+                      max: 10,
+                      divisions: 9,
+                      labels: RangeLabels(
+                        filterSettings._currentRangeValuesBathrooms.start
+                            .round()
+                            .toString(),
+                        filterSettings._currentRangeValuesBathrooms.end
+                            .round()
+                            .toString(),
                       ),
-                filterSettings._bathroomsChecked == false
-                    ? Container()
-                    : Expanded(
-                        child: RangeSlider(
-                          values: filterSettings._currentRangeValuesBathrooms,
-                          min: 1,
-                          max: 10,
-                          divisions: 9,
-                          labels: RangeLabels(
-                            filterSettings._currentRangeValuesBathrooms.start
-                                .round()
-                                .toString(),
-                            filterSettings._currentRangeValuesBathrooms.end
-                                .round()
-                                .toString(),
-                          ),
-                          onChanged: (RangeValues values) {
-                            setState(() {
-                              filterSettings._currentRangeValuesBathrooms =
-                                  values;
-                            });
-                          },
-                        ),
-                      )
+                      onChanged: (RangeValues values) {
+                        setState(() {
+                          filterSettings._currentRangeValuesBathrooms = values;
+                        });
+                      },
+                    ),
+                  )
               ],
             ),
           ),
@@ -414,51 +393,43 @@ class _BottomSheetWidgetFilteringState
                 ),
                 Container(
                   width: 100,
-                  child: Text("Accommodates"),
+                  child: const Text("Accommodates"),
                 ),
-                filterSettings._accommodatesChecked == false
-                    ? Container()
-                    : Container(
-                        width: 80,
-                        child: Text(
-                          "(" +
-                              filterSettings
-                                  ._currentRangeValuesAccommodates.start
-                                  .round()
-                                  .toString() +
-                              " - " +
-                              filterSettings._currentRangeValuesAccommodates.end
-                                  .round()
-                                  .toString() +
-                              ")",
-                          textAlign: TextAlign.center,
-                        ),
+                if (filterSettings._accommodatesChecked == false)
+                  Container()
+                else
+                  Container(
+                    width: 80,
+                    child: Text(
+                      "(${filterSettings._currentRangeValuesAccommodates.start.round()} - ${filterSettings._currentRangeValuesAccommodates.end.round()})",
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                if (filterSettings._accommodatesChecked == false)
+                  Container()
+                else
+                  Expanded(
+                    child: RangeSlider(
+                      values: filterSettings._currentRangeValuesAccommodates,
+                      min: 1,
+                      max: 20,
+                      divisions: 19,
+                      labels: RangeLabels(
+                        filterSettings._currentRangeValuesAccommodates.start
+                            .round()
+                            .toString(),
+                        filterSettings._currentRangeValuesAccommodates.end
+                            .round()
+                            .toString(),
                       ),
-                filterSettings._accommodatesChecked == false
-                    ? Container()
-                    : Expanded(
-                        child: RangeSlider(
-                          values:
-                              filterSettings._currentRangeValuesAccommodates,
-                          min: 1,
-                          max: 20,
-                          divisions: 19,
-                          labels: RangeLabels(
-                            filterSettings._currentRangeValuesAccommodates.start
-                                .round()
-                                .toString(),
-                            filterSettings._currentRangeValuesAccommodates.end
-                                .round()
-                                .toString(),
-                          ),
-                          onChanged: (RangeValues values) {
-                            setState(() {
-                              filterSettings._currentRangeValuesAccommodates =
-                                  values;
-                            });
-                          },
-                        ),
-                      ),
+                      onChanged: (RangeValues values) {
+                        setState(() {
+                          filterSettings._currentRangeValuesAccommodates =
+                              values;
+                        });
+                      },
+                    ),
+                  ),
               ],
             ),
           ),
@@ -480,13 +451,14 @@ class _BottomSheetWidgetFilteringState
                       ),
                       Container(
                         width: 190,
-                        child: Text("Property Type"),
+                        child: const Text("Property Type"),
                       ),
-                      filterSettings._propertyTypeChecked == false
-                          ? Container()
-                          : Expanded(
-                              child: buildPropertyType(),
-                            ),
+                      if (filterSettings._propertyTypeChecked == false)
+                        Container()
+                      else
+                        Expanded(
+                          child: buildPropertyType(),
+                        ),
                     ],
                   ),
                 ),
@@ -504,13 +476,14 @@ class _BottomSheetWidgetFilteringState
                       ),
                       Container(
                         width: 190,
-                        child: Text("Room Type"),
+                        child: const Text("Room Type"),
                       ),
-                      filterSettings._roomTypeChecked == false
-                          ? Container()
-                          : Expanded(
-                              child: buildRoomType(),
-                            ),
+                      if (filterSettings._roomTypeChecked == false)
+                        Container()
+                      else
+                        Expanded(
+                          child: buildRoomType(),
+                        ),
                     ],
                   ),
                 ),
@@ -528,24 +501,24 @@ class _BottomSheetWidgetFilteringState
                       ),
                       Container(
                         width: 190,
-                        child: Text("Neighbourhood"),
+                        child: const Text("Neighbourhood"),
                       ),
-                      filterSettings._neighbourhoodChecked == false
-                          ? Container()
-                          : Expanded(
-                              child: buildNeighbourhoodType(),
-                            ),
+                      if (filterSettings._neighbourhoodChecked == false)
+                        Container()
+                      else
+                        Expanded(
+                          child: buildNeighbourhoodType(),
+                        ),
                     ],
                   ),
                 ),
               ],
             ),
           ),
-          SizedBox(
+          const SizedBox(
             height: 20,
           ),
           ElevatedButton(
-            child: Text('Save'),
             onPressed: () => {
               if (formKey.currentState!.validate())
                 {
@@ -553,6 +526,7 @@ class _BottomSheetWidgetFilteringState
                   _submit(filterSettings, myFlatProvider)
                 }
             },
+            child: const Text('Save'),
           ),
         ],
       ),

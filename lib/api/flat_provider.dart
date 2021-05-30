@@ -1,11 +1,19 @@
+import 'dart:collection';
+import 'dart:math';
+import 'dart:typed_data';
+
+import 'package:airbnb/gist/Gist.dart';
 import 'package:airbnb/models/place.dart';
+import 'package:airbnb/models/polygon_neighbourhood.dart';
 import 'package:airbnb/screens/flat_detail_screen.dart';
 import 'package:airbnb/widget/bottom_sheet_widget_filter.dart';
 import 'package:airbnb/widget/bottom_sheet_widget_price_prediction.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:characters/characters.dart';
 
 class FlatProvider with ChangeNotifier {
   List<Flat> _flats = [];
@@ -14,20 +22,13 @@ class FlatProvider with ChangeNotifier {
   var _context;
 
   //Flat attributes
-  List<String> _roomType = [];
-  List<String> _propertyType = [];
-  List<String> _neighbourhood = [];
-  List<String> _neighbourhoodCleansed = [];
+  final List<String> _roomType = [];
+  final List<String> _propertyType = [];
+  final List<String> _neighbourhood = [];
+  final List<String> _neighbourhoodCleansed = [];
   String _predictedPrice = "";
 
-  //Maps
-  BitmapDescriptor mapMarker = BitmapDescriptor.defaultMarker;
   List<Marker> _markers = [];
-  /*
-  Set<Polygon> _polygons = HashSet<Polygon>();
-  int _polygonIdCounter = 1;
-  bool _isPolygon = true; //Default
-  */
 
   //getters
   bool get isLoading {
@@ -66,22 +67,24 @@ class FlatProvider with ChangeNotifier {
     return List.from(_neighbourhoodCleansed);
   }
 
-  List<Marker> get allMarkers {
-    return List.from(_markers);
+  Set<Marker> get allMarkers {
+    return Set.from(_markers);
   }
 
-  getlocation(int i) {
+  Flat getLocation(int i) {
     return _flats[i];
   }
 
-  void setMarkers() async {
-    var temp = await BitmapDescriptor.fromAssetImage(
-        ImageConfiguration(size: Size(35, 52), locale: Locale('de', 'CH')),
+  Future setMarkers() async {
+    final mapMarker = await BitmapDescriptor.fromAssetImage(
+        const ImageConfiguration(
+          size: Size(30, 45),
+          locale: Locale('de', 'CH'),
+        ),
         'assets/marker.png');
-    mapMarker = temp;
     _markers = [];
-    _flats.forEach((element) {
-      _markers.add(new Marker(
+    for (final element in _flats) {
+      _markers.add(Marker(
         markerId: MarkerId(element.id.toString()),
         position: LatLng(
           element.latitude,
@@ -99,7 +102,7 @@ class FlatProvider with ChangeNotifier {
             }
         },
       ));
-    });
+    }
     _isLoading = false;
     notifyListeners();
   }
@@ -108,7 +111,7 @@ class FlatProvider with ChangeNotifier {
     _context = ctx;
     _isLoading = true;
     // notifyListeners();
-    final url = 'http://localhost:5000/api/allListings';
+    const url = 'http://localhost:5000/api/allListings';
     try {
       final response = await http.get(
         Uri.parse(url),
@@ -174,8 +177,7 @@ class FlatProvider with ChangeNotifier {
   Future<void> filterListings(FilterSettings filterSettings) async {
     _isLoading = true;
     // notifyListeners();
-    Map<String, dynamic> data = {};
-    print(data.isEmpty);
+    final Map<String, dynamic> data = {};
 
     Map<String, dynamic> _price;
     if (filterSettings.priceChecked == true) {
@@ -250,13 +252,13 @@ class FlatProvider with ChangeNotifier {
     Map<String, dynamic> finalData = {};
 
     if (data.isEmpty) {
-      Map<String, dynamic> _emptyFilter = {'criteria': {}};
+      final Map<String, dynamic> _emptyFilter = {'criteria': {}};
       finalData.addAll(_emptyFilter);
     } else {
       finalData = {'criteria': data};
     }
 
-    final url = 'http://localhost:5000/api/filterListings';
+    const url = 'http://localhost:5000/api/filterListings';
     try {
       final response = await http.post(
         Uri.parse(url),
@@ -305,7 +307,7 @@ class FlatProvider with ChangeNotifier {
 
   Future<void> predictPrice(FilterSettingsPredictPrice filterSettings) async {
     // notifyListeners();
-    var map = Map<String, dynamic>();
+    final map = <String, dynamic>{};
     map["bathrooms"] = filterSettings.currentBathrooms;
     map["bedrooms"] = filterSettings.currentBedrooms;
     map["accommodates"] = filterSettings.currentAccommodates;
@@ -317,9 +319,9 @@ class FlatProvider with ChangeNotifier {
     map["property_type"] = filterSettings.currentPropertyType;
     map["room_type"] = filterSettings.currentRoomType;
 
-    var jsonData = jsonEncode(map);
+    final jsonData = jsonEncode(map);
 
-    final url = 'http://localhost:5000/api/pricePrediction';
+    const url = 'http://localhost:5000/api/pricePrediction';
     try {
       final response = await http.post(
         Uri.parse(url),
@@ -342,35 +344,25 @@ class FlatProvider with ChangeNotifier {
   }
 
   Future<void> predictPriceParams() async {
-    final url = 'http://localhost:5000/api/pricePredictionParamValues';
+    const url = 'http://localhost:5000/api/pricePredictionParamValues';
     try {
       final response = await http.get(
         Uri.parse(url),
         headers: {
           "content-type": "application/json",
         },
-      ).timeout(Duration(seconds: 6));
+      );
       final Map<String, dynamic> responseData = json.decode(response.body);
       if (responseData == null) {
         return;
       }
-      var neighbourhood = responseData["neighbourhood"];
-      var neighbourhoodListCleansed = neighbourhood["values"];
+      final neighbourhood = responseData["neighbourhood"];
+      final neighbourhoodListCleansed = neighbourhood["values"];
       neighbourhoodListCleansed.forEach((element) {
         _neighbourhoodCleansed.add(element);
       });
-      print(responseData);
     } catch (error) {
       debugPrint(error.toString());
     }
   }
-
-  //Draw Polygon to the map
-/*  void _setPolygon() {
-    final String polygonIdVal = "";
-    _polygons.add(Polygon(
-      polygonId: PolygonId(polygonIdVal)
-    ));
-  }
-  */
 }

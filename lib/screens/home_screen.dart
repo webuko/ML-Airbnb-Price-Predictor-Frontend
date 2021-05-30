@@ -1,17 +1,20 @@
 import 'dart:async';
-
-import 'package:airbnb/models/mockModel.dart';
+import 'dart:typed_data';
+import 'package:airbnb/api/neigbourhood_provider.dart';
+import 'package:airbnb/gist/Gist.dart';
 import 'package:airbnb/widget/bottom_sheet_widget_filter.dart';
 import 'package:airbnb/widget/bottom_sheet_widget_price_prediction.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:pointer_interceptor/pointer_interceptor.dart';
 import 'package:provider/provider.dart';
 
-import '../api/flatProvider.dart';
+import '../api/flat_provider.dart';
 
+//@HomeScreen class
 class HomeScreen extends StatefulWidget {
   @override
   _HomeScreenState createState() => _HomeScreenState();
@@ -24,14 +27,19 @@ class _HomeScreenState extends State<HomeScreen> {
   bool _showBottomSheetPricePrediction = false;
   bool _showFloatingActionButton = false;
 
+  bool _showFlatMarkers = true;
+  bool _showNeighbourhoodMarkers = true;
+
   @override
   initState() {
     super.initState();
     _fetchFlates();
+    //Fetch the params that can be used for the neigbourhood in the "predict Price" form.
     _fetchPricePredictParams();
+    _fetchAvgPricePerNeighbourhood();
   }
 
-  _fetchFlates() async {
+  Future _fetchFlates() async {
     setState(() {
       _isLoadingFlats = true;
     });
@@ -43,40 +51,50 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
-  _fetchPricePredictParams() async {
+  Future _fetchPricePredictParams() async {
     await Provider.of<FlatProvider>(context, listen: false)
         .predictPriceParams();
   }
 
+  Future _fetchAvgPricePerNeighbourhood() async {
+    await Provider.of<NeighbourhoodProvider>(context, listen: false)
+        .avgPricePerNeighbourhood(context);
+  }
+
   @override
   Widget build(BuildContext context) {
-    final myFlatProvider = context.read<FlatProvider>();
+    final FlatProvider myFlatProvider = context.read<FlatProvider>();
     if (_isLoadingFlats == true) {
-      return Center(
+      return const Center(
         child: CircularProgressIndicator(),
       );
-    } else
+    } else {
       return Scaffold(
-        onEndDrawerChanged: (isOpen) {
-          setState(() {
-            myFlatProvider.setDrawerOpen(isOpen);
-          });
+        onDrawerChanged: (isOpen) {
+          setState(
+            () {
+              myFlatProvider.setDrawerOpen(isOpen);
+            },
+          );
         },
-        endDrawer: PointerInterceptor(
+        drawer: PointerInterceptor(
           child: Drawer(
             child: ListView(
               padding: EdgeInsets.zero,
               children: [
-                DrawerHeader(
+                const DrawerHeader(
                   decoration: BoxDecoration(color: Colors.blue),
                   child: Text(
                     "Airbnb flat price calculator",
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white),
                   ),
                 ),
                 ListTile(
-                  leading: Icon(Icons.filter_alt),
-                  title: Text(
+                  leading: const Icon(Icons.filter_alt),
+                  title: const Text(
                     'Filter Listings',
                     style: TextStyle(fontSize: 16),
                   ),
@@ -94,20 +112,22 @@ class _HomeScreenState extends State<HomeScreen> {
                   },
                 ),
                 ListTile(
-                  leading: Icon(Icons.calculate),
-                  title: Text(
+                  leading: const Icon(Icons.calculate),
+                  title: const Text(
                     'Price prediction',
                     style: TextStyle(fontSize: 16),
                   ),
                   onTap: () {
                     // Update the state of the app
-                    setState(() {
-                      //Set other bottom sheets to false
-                      _showBottomSheetFiltering = false;
+                    setState(
+                      () {
+                        //Set other bottom sheets to false
+                        _showBottomSheetFiltering = false;
 
-                      _showBottomSheetPricePrediction = true;
-                      _showFloatingActionButton = true;
-                    });
+                        _showBottomSheetPricePrediction = true;
+                        _showFloatingActionButton = true;
+                      },
+                    );
                     // Then close the drawer
                     Navigator.pop(context);
                   },
@@ -116,63 +136,64 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
         ),
-        appBar: AppBar(),
+        appBar: AppBar(actions: <Widget>[
+          (_showNeighbourhoodMarkers)
+              ? IconButton(
+                  icon: const Icon(Icons.visibility_off),
+                  onPressed: () {
+                    setState(() {
+                      _showNeighbourhoodMarkers = !_showNeighbourhoodMarkers;
+                    });
+                  },
+                )
+              : IconButton(
+                  icon: const Icon(Icons.visibility),
+                  onPressed: () {
+                    setState(() {
+                      _showNeighbourhoodMarkers = !_showNeighbourhoodMarkers;
+                    });
+                  },
+                ),
+          (_showFlatMarkers)
+              ? IconButton(
+                  icon: const Icon(Icons.location_off),
+                  onPressed: () {
+                    setState(() {
+                      _showFlatMarkers = !_showFlatMarkers;
+                    });
+                  },
+                )
+              : IconButton(
+                  icon: const Icon(Icons.location_on),
+                  onPressed: () {
+                    setState(() {
+                      _showFlatMarkers = !_showFlatMarkers;
+                    });
+                  },
+                ),
+        ]),
         body: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            /* Padding(
-              padding: const EdgeInsets.only(
-                top: 10.0,
-                left: 10.0,
-              ),
-              child: Text(
-                "Highest Total Revenue",
-                style: TextStyle(
-                    fontSize: 30.0,
-                    color: Colors.black54,
-                    fontWeight: FontWeight.bold),
+            Expanded(
+              child: MyGoogleMapWidget(
+                drawerActive: myFlatProvider.isDrawerOpen,
+                showFlatMarkers: _showFlatMarkers,
+                showNeighbourhoodMarkers: _showNeighbourhoodMarkers,
               ),
             ),
-            Container(
-              padding: EdgeInsets.only(left: 10.0),
-              height: 220.0,
-              child: ListView.builder(
-                  scrollDirection: Axis.horizontal,
-                  itemCount: 3,
-                  itemBuilder: (context, index) {
-                    return _buildHighestRevenueList(
-                        context, index, categoryList.host);
-                  }),
-            ),*/
-            Container(
-              child: Expanded(
-                child: MyGoogleMapWidget(myFlatProvider.isDrawerOpen),
-              ),
-            ),
-            Container(
+            SizedBox(
               height: (_showBottomSheetFiltering == true)
                   ? (MediaQuery.of(context).size.height / 2)
                   : 0,
               child: BottomSheetWidgetFiltering(),
             ),
-            Container(
+            SizedBox(
               height: (_showBottomSheetPricePrediction == true)
                   ? (MediaQuery.of(context).size.height / 1.5)
                   : 0,
               child: BottomSheetWidgetPricePrediction(),
             ),
-            /* (() {
-              if (_showBottomSheetFiltering == true) {
-                return BottomSheetWidgetFiltering();
-              } else if (_showBottomSheetPricePrediction == true) {
-                return BottomSheetWidgetPricePrediction();
-              } else {
-                return Container(
-                  height: 0,
-                );
-              }
-            }())*/
           ],
         ),
         floatingActionButton: _showFloatingActionButton == true
@@ -188,108 +209,75 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: const Icon(Icons.close),
               )
             : null,
-        //floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
       );
+    }
   }
 }
 
-class MyGoogleMapWidget extends StatelessWidget {
-  final bool _drawerActive;
-  MyGoogleMapWidget(this._drawerActive);
+class MyGoogleMapWidget extends StatefulWidget {
+  //MyGoogleMapWidget
+  MyGoogleMapWidget({
+    required this.drawerActive,
+    required this.showFlatMarkers,
+    required this.showNeighbourhoodMarkers,
+  });
+
+  final bool drawerActive;
+  final bool showFlatMarkers;
+  final bool showNeighbourhoodMarkers;
+
+  @override
+  _MyGoogleMapWidgetState createState() => _MyGoogleMapWidgetState();
+}
+
+class _MyGoogleMapWidgetState extends State<MyGoogleMapWidget> {
   final Completer<GoogleMapController> _controller = Completer();
 
+  @override
   Widget build(BuildContext context) {
-    final myFlatProvider = context.watch<FlatProvider>();
-    if (myFlatProvider.isLoading == true) {
-      return Center(
+    final FlatProvider _myFlatProvider = context.watch<FlatProvider>();
+    final NeighbourhoodProvider _myNeighbourhoodProvider =
+        context.watch<NeighbourhoodProvider>();
+
+    final Set<Marker> empty = {};
+    final Set<Marker> all = {};
+    all.addAll(_myFlatProvider.allMarkers);
+    all.addAll(_myNeighbourhoodProvider.allNeighbourhoodMarkers);
+
+    if (_myFlatProvider.isLoading == true) {
+      return const Center(
         child: CircularProgressIndicator(),
       );
-    } else
-      return Container(
-        child: GoogleMap(
-          scrollGesturesEnabled: _drawerActive == true ? false : true,
-          mapType: MapType.normal,
-          initialCameraPosition: CameraPosition(
-            target: LatLng(
-              52.518817,
-              13.407257,
-            ),
-            zoom: 16,
+    } else {
+      return GoogleMap(
+        polygons: _myNeighbourhoodProvider.getPolygons,
+        scrollGesturesEnabled: widget.drawerActive == true ? false : true,
+        mapType: MapType.normal,
+        initialCameraPosition: const CameraPosition(
+          target: LatLng(
+            52.518817,
+            13.407257,
           ),
-          onMapCreated: (GoogleMapController controller) {
-            _controller.complete(controller);
-          },
-          markers: Set.from(myFlatProvider.allMarkers),
-          gestureRecognizers: {
-            Factory<OneSequenceGestureRecognizer>(
-                () => ScaleGestureRecognizer()),
-          },
+          zoom: 16,
         ),
+        onMapCreated: (GoogleMapController controller) {
+          _controller.complete(controller);
+        },
+        markers: (() {
+          if (widget.showFlatMarkers && widget.showNeighbourhoodMarkers) {
+            return all;
+          } else if (widget.showFlatMarkers) {
+            return _myFlatProvider.allMarkers;
+          } else if (widget.showNeighbourhoodMarkers) {
+            return _myNeighbourhoodProvider.allNeighbourhoodMarkers;
+          } else {
+            return empty;
+          }
+        }()),
+        gestureRecognizers: {
+          Factory<OneSequenceGestureRecognizer>(() => ScaleGestureRecognizer()),
+        },
       );
+    }
   }
-}
-
-Widget _buildHighestRevenueList(context, index, List<Host> listImages) {
-  return Container(
-    width: 200.0,
-    padding: const EdgeInsets.only(left: 10.0, top: 10.0),
-    child: Column(
-      mainAxisAlignment: MainAxisAlignment.start,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        ClipRRect(
-            borderRadius: BorderRadius.circular(10.0),
-            child: Image.asset(
-              listImages[index].image,
-              width: 220.0,
-              height: 100.0,
-              fit: BoxFit.cover,
-            )),
-        Text(
-          listImages[index].name,
-          style: TextStyle(color: Colors.grey),
-        ),
-        Text(
-          listImages[index].desc,
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12.0),
-        ),
-        Text(listImages[index].price, style: TextStyle(fontSize: 12.0)),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            Icon(
-              Icons.star,
-              color: Colors.red,
-              size: 15.0,
-            ),
-            Icon(
-              Icons.star,
-              color: Colors.red,
-              size: 15.0,
-            ),
-            Icon(
-              Icons.star,
-              color: Colors.red,
-              size: 15.0,
-            ),
-            Icon(
-              Icons.star,
-              color: Colors.red,
-              size: 15.0,
-            ),
-            Icon(
-              Icons.star,
-              color: Colors.red,
-              size: 15.0,
-            ),
-            Padding(
-              padding: const EdgeInsets.only(left: 8.0),
-              child: Text(listImages[index].rating),
-            ),
-          ],
-        )
-      ],
-    ),
-  );
 }
