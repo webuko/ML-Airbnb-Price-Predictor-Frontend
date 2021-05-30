@@ -6,7 +6,7 @@ import 'dart:convert';
 
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
-//How to convert into json
+//Used to draw neighbourhood polygons and neighbourhood average prices
 List<PolygonNeighbourhood> welcomeFromJson(String str) =>
     List<PolygonNeighbourhood>.from(
         json.decode(str).map((x) => PolygonNeighbourhood.fromJson(x)));

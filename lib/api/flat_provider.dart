@@ -1,10 +1,4 @@
-import 'dart:collection';
-import 'dart:math';
-import 'dart:typed_data';
-
-import 'package:airbnb/gist/Gist.dart';
-import 'package:airbnb/models/place.dart';
-import 'package:airbnb/models/polygon_neighbourhood.dart';
+import 'package:airbnb/models/flat.dart';
 import 'package:airbnb/screens/flat_detail_screen.dart';
 import 'package:airbnb/widget/bottom_sheet_widget_filter.dart';
 import 'package:airbnb/widget/bottom_sheet_widget_price_prediction.dart';
@@ -13,7 +7,6 @@ import 'package:flutter/rendering.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'package:characters/characters.dart';
 
 class FlatProvider with ChangeNotifier {
   List<Flat> _flats = [];
@@ -107,6 +100,7 @@ class FlatProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  // Get all Flats from the database
   Future<void> allListings(ctx) async {
     _context = ctx;
     _isLoading = true;
@@ -174,9 +168,9 @@ class FlatProvider with ChangeNotifier {
     }
   }
 
+  //Filter the flats according the Filtersettings
   Future<void> filterListings(FilterSettings filterSettings) async {
     _isLoading = true;
-    // notifyListeners();
     final Map<String, dynamic> data = {};
 
     Map<String, dynamic> _price;
@@ -228,7 +222,6 @@ class FlatProvider with ChangeNotifier {
       _propertyType = {
         'property_type': [filterSettings.propertyType],
       };
-      //data.addAll(_propertyType);
       data.addAll(_propertyType);
     }
 
@@ -237,7 +230,6 @@ class FlatProvider with ChangeNotifier {
       _roomType = {
         'room_type': [filterSettings.roomType],
       };
-      //data.addAll(_roomType);
       data.addAll(_roomType);
     }
 
@@ -250,7 +242,6 @@ class FlatProvider with ChangeNotifier {
     }
 
     Map<String, dynamic> finalData = {};
-
     if (data.isEmpty) {
       final Map<String, dynamic> _emptyFilter = {'criteria': {}};
       finalData.addAll(_emptyFilter);
@@ -305,8 +296,8 @@ class FlatProvider with ChangeNotifier {
     }
   }
 
+  //Fetch the predicted price from the API according the FilterSettings
   Future<void> predictPrice(FilterSettingsPredictPrice filterSettings) async {
-    // notifyListeners();
     final map = <String, dynamic>{};
     map["bathrooms"] = filterSettings.currentBathrooms;
     map["bedrooms"] = filterSettings.currentBedrooms;
@@ -343,6 +334,7 @@ class FlatProvider with ChangeNotifier {
     }
   }
 
+  //Get the parameters that can be used in the forumlas
   Future<void> predictPriceParams() async {
     const url = 'http://localhost:5000/api/pricePredictionParamValues';
     try {

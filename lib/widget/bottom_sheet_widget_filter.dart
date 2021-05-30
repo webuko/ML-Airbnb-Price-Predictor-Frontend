@@ -1,4 +1,5 @@
 import 'package:airbnb/api/flat_provider.dart';
+import 'package:airbnb/api/neigbourhood_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:provider/provider.dart';
@@ -100,6 +101,7 @@ class _BottomSheetWidgetFilteringState
   @override
   Widget build(BuildContext context) {
     final myFlatProvider = context.watch<FlatProvider>();
+    final myNeighbourhoodProvider = context.watch<NeighbourhoodProvider>();
 
     List<String> getSuggestionsPropertyTypes(String query) =>
         List.of(myFlatProvider.allPropertyType).where((input) {
@@ -241,7 +243,7 @@ class _BottomSheetWidgetFilteringState
                   Container(
                     width: 80,
                     child: Text(
-                      "(${filterSettings._currentRangeValuesPrice.start.round()}€ - ${filterSettings._currentRangeValuesPrice.end.round()}€)",
+                      "(\$${filterSettings._currentRangeValuesPrice.start.round()} - \$${filterSettings._currentRangeValuesPrice.end.round()})",
                       textAlign: TextAlign.center,
                     ),
                   ),
@@ -523,7 +525,8 @@ class _BottomSheetWidgetFilteringState
               if (formKey.currentState!.validate())
                 {
                   formKey.currentState!.save(),
-                  _submit(filterSettings, myFlatProvider)
+                  _submit(
+                      filterSettings, myFlatProvider, myNeighbourhoodProvider)
                 }
             },
             child: const Text('Save'),
@@ -533,11 +536,15 @@ class _BottomSheetWidgetFilteringState
     );
   }
 
-  Future<void> _submit(FilterSettings filterSettings, myFlatProvider) async {
+  Future<void> _submit(
+      FilterSettings filterSettings,
+      FlatProvider myFlatProvider,
+      NeighbourhoodProvider myNeigbourhoodProvider) async {
     setState(() {
       _isLoading = true;
     });
     await myFlatProvider.filterListings(filterSettings);
+    await myNeigbourhoodProvider.filterAveragePriceListings(filterSettings);
     setState(() {
       _isLoading = false;
     });

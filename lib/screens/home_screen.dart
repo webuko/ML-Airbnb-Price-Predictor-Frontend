@@ -1,14 +1,10 @@
 import 'dart:async';
-import 'dart:typed_data';
 import 'package:airbnb/api/neigbourhood_provider.dart';
-import 'package:airbnb/gist/Gist.dart';
 import 'package:airbnb/widget/bottom_sheet_widget_filter.dart';
 import 'package:airbnb/widget/bottom_sheet_widget_price_prediction.dart';
-import 'package:flutter/foundation.dart';
-import 'package:flutter/gestures.dart';
+import 'package:airbnb/widget/google_maps_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:pointer_interceptor/pointer_interceptor.dart';
 import 'package:provider/provider.dart';
 
@@ -23,42 +19,43 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final bool isSelecting = false;
   bool _isLoadingFlats = false;
+  //Parametrisation
   bool _showBottomSheetFiltering = false;
   bool _showBottomSheetPricePrediction = false;
   bool _showFloatingActionButton = false;
-
-  bool _showFlatMarkers = true;
+  bool _showFlatMarkers = false;
   bool _showNeighbourhoodMarkers = true;
 
   @override
   initState() {
     super.initState();
     _fetchFlates();
-    //Fetch the params that can be used for the neigbourhood in the "predict Price" form.
     _fetchPricePredictParams();
     _fetchAvgPricePerNeighbourhood();
   }
 
+  //Fetch all Listings
   Future _fetchFlates() async {
     setState(() {
       _isLoadingFlats = true;
     });
     await Provider.of<FlatProvider>(context, listen: false)
         .allListings(context);
-    //setMarkers();
     setState(() {
       _isLoadingFlats = false;
     });
   }
 
-  Future _fetchPricePredictParams() async {
-    await Provider.of<FlatProvider>(context, listen: false)
-        .predictPriceParams();
-  }
-
+  //Fetch intial average Price for all Listings and Polygons for neighbourhoods
   Future _fetchAvgPricePerNeighbourhood() async {
     await Provider.of<NeighbourhoodProvider>(context, listen: false)
         .avgPricePerNeighbourhood(context);
+  }
+
+  //Fetch the data for the forms in the filterings
+  Future _fetchPricePredictParams() async {
+    await Provider.of<FlatProvider>(context, listen: false)
+        .predictPriceParams();
   }
 
   @override
@@ -103,7 +100,6 @@ class _HomeScreenState extends State<HomeScreen> {
                     setState(() {
                       //Set other bottom sheets to false
                       _showBottomSheetPricePrediction = false;
-
                       _showBottomSheetFiltering = true;
                       _showFloatingActionButton = true;
                     });
@@ -123,7 +119,6 @@ class _HomeScreenState extends State<HomeScreen> {
                       () {
                         //Set other bottom sheets to false
                         _showBottomSheetFiltering = false;
-
                         _showBottomSheetPricePrediction = true;
                         _showFloatingActionButton = true;
                       },
@@ -139,7 +134,7 @@ class _HomeScreenState extends State<HomeScreen> {
         appBar: AppBar(actions: <Widget>[
           (_showNeighbourhoodMarkers)
               ? IconButton(
-                  icon: const Icon(Icons.visibility_off),
+                  icon: const Icon(Icons.visibility),
                   onPressed: () {
                     setState(() {
                       _showNeighbourhoodMarkers = !_showNeighbourhoodMarkers;
@@ -147,7 +142,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   },
                 )
               : IconButton(
-                  icon: const Icon(Icons.visibility),
+                  icon: const Icon(Icons.visibility_off),
                   onPressed: () {
                     setState(() {
                       _showNeighbourhoodMarkers = !_showNeighbourhoodMarkers;
@@ -156,7 +151,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
           (_showFlatMarkers)
               ? IconButton(
-                  icon: const Icon(Icons.location_off),
+                  icon: const Icon(Icons.location_on),
                   onPressed: () {
                     setState(() {
                       _showFlatMarkers = !_showFlatMarkers;
@@ -164,7 +159,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   },
                 )
               : IconButton(
-                  icon: const Icon(Icons.location_on),
+                  icon: const Icon(Icons.location_off),
                   onPressed: () {
                     setState(() {
                       _showFlatMarkers = !_showFlatMarkers;
@@ -209,74 +204,6 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: const Icon(Icons.close),
               )
             : null,
-      );
-    }
-  }
-}
-
-class MyGoogleMapWidget extends StatefulWidget {
-  //MyGoogleMapWidget
-  MyGoogleMapWidget({
-    required this.drawerActive,
-    required this.showFlatMarkers,
-    required this.showNeighbourhoodMarkers,
-  });
-
-  final bool drawerActive;
-  final bool showFlatMarkers;
-  final bool showNeighbourhoodMarkers;
-
-  @override
-  _MyGoogleMapWidgetState createState() => _MyGoogleMapWidgetState();
-}
-
-class _MyGoogleMapWidgetState extends State<MyGoogleMapWidget> {
-  final Completer<GoogleMapController> _controller = Completer();
-
-  @override
-  Widget build(BuildContext context) {
-    final FlatProvider _myFlatProvider = context.watch<FlatProvider>();
-    final NeighbourhoodProvider _myNeighbourhoodProvider =
-        context.watch<NeighbourhoodProvider>();
-
-    final Set<Marker> empty = {};
-    final Set<Marker> all = {};
-    all.addAll(_myFlatProvider.allMarkers);
-    all.addAll(_myNeighbourhoodProvider.allNeighbourhoodMarkers);
-
-    if (_myFlatProvider.isLoading == true) {
-      return const Center(
-        child: CircularProgressIndicator(),
-      );
-    } else {
-      return GoogleMap(
-        polygons: _myNeighbourhoodProvider.getPolygons,
-        scrollGesturesEnabled: widget.drawerActive == true ? false : true,
-        mapType: MapType.normal,
-        initialCameraPosition: const CameraPosition(
-          target: LatLng(
-            52.518817,
-            13.407257,
-          ),
-          zoom: 16,
-        ),
-        onMapCreated: (GoogleMapController controller) {
-          _controller.complete(controller);
-        },
-        markers: (() {
-          if (widget.showFlatMarkers && widget.showNeighbourhoodMarkers) {
-            return all;
-          } else if (widget.showFlatMarkers) {
-            return _myFlatProvider.allMarkers;
-          } else if (widget.showNeighbourhoodMarkers) {
-            return _myNeighbourhoodProvider.allNeighbourhoodMarkers;
-          } else {
-            return empty;
-          }
-        }()),
-        gestureRecognizers: {
-          Factory<OneSequenceGestureRecognizer>(() => ScaleGestureRecognizer()),
-        },
       );
     }
   }

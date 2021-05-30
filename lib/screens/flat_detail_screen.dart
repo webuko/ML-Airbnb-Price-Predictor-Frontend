@@ -1,6 +1,5 @@
-import 'package:airbnb/models/place.dart';
+import 'package:airbnb/models/flat.dart';
 import 'package:flutter/material.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class FlatDetailScreen extends StatefulWidget {
   final Flat element;
@@ -13,20 +12,10 @@ class FlatDetailScreen extends StatefulWidget {
 
 class _FlatDetailcreenState extends State<FlatDetailScreen> {
   Flat element;
-
   _FlatDetailcreenState(this.element);
-
-  late GoogleMapController mapController;
-
-  final LatLng _center = const LatLng(45.521563, -122.677433);
-
-  void _onMapCreated(GoogleMapController controller) {
-    mapController = controller;
-  }
 
   @override
   Widget build(BuildContext flatScreenContext) {
-    Size size = MediaQuery.of(context).size;
     return Scaffold(
       body: ListView(
         children: <Widget>[
@@ -102,23 +91,6 @@ class _FlatDetailcreenState extends State<FlatDetailScreen> {
                                   ],
                                 ),
                               ),
-                              Row(
-                                children: <Widget>[
-                                  Text(
-                                    "See Ratings",
-                                    style: TextStyle(color: Colors.grey),
-                                  ),
-                                  Padding(
-                                    padding: const EdgeInsets.only(top: 8.0),
-                                    child: Text(
-                                      "*****",
-                                      style: TextStyle(
-                                          color:
-                                              Theme.of(context).primaryColor),
-                                    ),
-                                  ),
-                                ],
-                              )
                             ],
                           ),
                         ),
@@ -126,7 +98,7 @@ class _FlatDetailcreenState extends State<FlatDetailScreen> {
                       Padding(
                         padding: const EdgeInsets.all(12.0),
                         child: Text(
-                          "Price: " + element.price.toString() + "€",
+                          "Price: \$" + element.price.toString(),
                           style: TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 25,
@@ -198,34 +170,13 @@ class _FlatDetailcreenState extends State<FlatDetailScreen> {
                         Padding(
                           padding: const EdgeInsets.only(top: 10.0),
                           child: Text(
-                            element.description,
+                            cutDescription(element.description),
                             style: TextStyle(color: Colors.grey),
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.only(bottom: 10.0),
-                          child: Text(
-                            "Read More....",
-                            style: TextStyle(
-                                color: Theme.of(context).primaryColor),
                           ),
                         ),
                       ],
                     ),
                   ),
-                  SizedBox(
-                      height: 100.0,
-                      child:
-                          Container() /*GoogleMap(
-                        onMapCreated: _onMapCreated,
-                        options: GoogleMapOptions(
-                          cameraPosition: CameraPosition(
-                            target: _center,
-                            zoom: 11.0,
-                          ),
-                        ),
-                      ),*/
-                      )
                 ],
               ),
             ),
@@ -233,5 +184,16 @@ class _FlatDetailcreenState extends State<FlatDetailScreen> {
         ],
       ),
     );
+  }
+
+  //Cut everything after the last dot, since the database isn't providing a full description.
+  String cutDescription(String description) {
+    String result = "";
+    int pos = 0;
+    if (description.contains(".")) {
+      pos = description.lastIndexOf(".");
+      result = (pos != -1) ? description.substring(0, pos + 1) : description;
+    }
+    return result;
   }
 }
