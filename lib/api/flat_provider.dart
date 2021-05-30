@@ -339,7 +339,7 @@ class FlatProvider with ChangeNotifier {
 
   //Get the parameters that can be used in the forumlas
   Future<void> predictPriceParams() async {
-    const url = 'http://localhost:5000/api/pricePredictionParamValues';
+    final url = '${activeHost}/api/pricePredictionParamValues';
     try {
       final response = await http.get(
         Uri.parse(url),
