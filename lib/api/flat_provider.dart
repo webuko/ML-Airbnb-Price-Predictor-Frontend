@@ -168,9 +168,9 @@ class FlatProvider with ChangeNotifier {
     }
   }
 
+  //Filter the flats according the Filtersettings
   Future<void> filterListings(FilterSettings filterSettings) async {
     _isLoading = true;
-    // notifyListeners();
     final Map<String, dynamic> data = {};
 
     Map<String, dynamic> _price;
@@ -222,7 +222,6 @@ class FlatProvider with ChangeNotifier {
       _propertyType = {
         'property_type': [filterSettings.propertyType],
       };
-      //data.addAll(_propertyType);
       data.addAll(_propertyType);
     }
 
@@ -231,7 +230,6 @@ class FlatProvider with ChangeNotifier {
       _roomType = {
         'room_type': [filterSettings.roomType],
       };
-      //data.addAll(_roomType);
       data.addAll(_roomType);
     }
 
@@ -244,7 +242,6 @@ class FlatProvider with ChangeNotifier {
     }
 
     Map<String, dynamic> finalData = {};
-
     if (data.isEmpty) {
       final Map<String, dynamic> _emptyFilter = {'criteria': {}};
       finalData.addAll(_emptyFilter);
@@ -299,8 +296,8 @@ class FlatProvider with ChangeNotifier {
     }
   }
 
+  //Fetch the predicted price from the API according the FilterSettings
   Future<void> predictPrice(FilterSettingsPredictPrice filterSettings) async {
-    // notifyListeners();
     final map = <String, dynamic>{};
     map["bathrooms"] = filterSettings.currentBathrooms;
     map["bedrooms"] = filterSettings.currentBedrooms;
@@ -337,6 +334,7 @@ class FlatProvider with ChangeNotifier {
     }
   }
 
+  //Get the parameters that can be used in the forumlas
   Future<void> predictPriceParams() async {
     const url = 'http://localhost:5000/api/pricePredictionParamValues';
     try {
