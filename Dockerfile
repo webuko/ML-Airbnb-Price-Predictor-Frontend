@@ -1,4 +1,4 @@
-#Stage 1 - Install dependencies and build the app
+# Stage 1 - Install dependencies and build the app
 FROM debian:latest AS build-env
 
 # Install flutter dependencies
@@ -21,11 +21,15 @@ RUN flutter upgrade
 RUN flutter config --enable-web
 
 # Copy files to container and build
-RUN git clone https://github.com/webuko/frontend.git
-COPY . /frontend
-WORKDIR /frontend
+RUN mkdir /frontend/
+COPY . /frontend/
+WORKDIR /frontend/
 RUN flutter build web
 
-# # Stage 2 - Create the run-time image
-FROM nginx
-COPY --from=build-env /frontend/build/web /usr/share/nginx/html
+EXPOSE 8080
+
+# Set the server startup script as executable
+RUN ["chmod", "+x", "/frontend/server/server.sh"]
+
+# Start the web server
+ENTRYPOINT [ "/frontend/server/server.sh" ]
