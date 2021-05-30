@@ -1,9 +1,9 @@
-import 'package:airbnb/HomeScreen.dart';
+import 'package:airbnb/api/neigbourhood_provider.dart';
+import 'package:airbnb/screens/home_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:url_strategy/url_strategy.dart';
-
-import 'models/placeProvider.dart';
+import 'api/flat_provider.dart';
 
 void main() {
   setPathUrlStrategy();
@@ -26,24 +26,16 @@ class _MyAppState extends State<MyApp> {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(
-          create: (_) => PlaceProvider(),
+          create: (_) => FlatProvider(),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => NeighbourhoodProvider(),
         ),
       ],
       child: MaterialApp(
+        debugShowCheckedModeBanner: false,
         home: HomeScreen(),
       ),
-      /*MaterialApp(
-        routes: {
-          '/': (BuildContext context) => QuizzMap(
-                initialLocation: PlaceLocation(
-                    latitude: 47.093907262310566,
-                    longitude: 8.27200087445975,
-                    id: "a",
-                    address: "test"),
-                isSelecting: false,
-              ),
-        },
-      ),*/
     );
   }
 }

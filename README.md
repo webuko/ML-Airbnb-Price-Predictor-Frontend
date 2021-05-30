@@ -2,10 +2,10 @@
 
 # Frontend
 
-This project is a Flutter application. For help getting started with Flutter, view the [online documentation](https://flutter.dev/docs), which offers tutorials, samples, guidance on mobile development, and a full API reference.
+This repository contains a Flutter application that is intended to be used in combination with a running [Webuko backend](https://github.com/webuko/backend).
 
 ## Plugins
-These are the plugins used in this repository.
+The following plugins are used in this repository:
 
 | Plugin | Pub |
 |--------|-----|
@@ -20,13 +20,5 @@ These are the plugins used in this repository.
 | [lint](./packages/lint) | [![pub package](https://img.shields.io/pub/v/lint.svg)](https://pub.dev/packages/lint.svg) |
 
 # Getting Started
-## Backend
 
-In order to get the app working as intendet, the backend is needed. The backend serves the purpose of building an API for retrieving data related to Airbnb listings. In the following, the data source, the involved frameworks and the API (for a detailed usage description, please have a look at this [repository's wiki](https://github.com/webuko/backend/wiki)) are presented. 
-
-Since the project can be used by docker, the set-up is easy. 
-Follow the instructions on the backend repository to get the app running:
-- [Backend - Get the App running](https://github.com/webuko/backend)
-
-
-
+In order to get the full app working as intendet, a running [Webuko backend](https://github.com/webuko/backend) is needed. The full app is published in images on Dockerhub and can easily be pulled and started with a single `docker-compose` file. Have a look [here](https://github.com/webuko/backend#how-to-run-the-api) in the backend repository for a detailed setup.
