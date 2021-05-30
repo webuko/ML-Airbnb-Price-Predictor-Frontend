@@ -1,4 +1,4 @@
-import 'package:airbnb/models/place.dart';
+import 'package:airbnb/models/flat.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
@@ -18,15 +18,8 @@ class _FlatDetailcreenState extends State<FlatDetailScreen> {
 
   late GoogleMapController mapController;
 
-  final LatLng _center = const LatLng(45.521563, -122.677433);
-
-  void _onMapCreated(GoogleMapController controller) {
-    mapController = controller;
-  }
-
   @override
   Widget build(BuildContext flatScreenContext) {
-    Size size = MediaQuery.of(context).size;
     return Scaffold(
       body: ListView(
         children: <Widget>[
@@ -102,23 +95,6 @@ class _FlatDetailcreenState extends State<FlatDetailScreen> {
                                   ],
                                 ),
                               ),
-                              Row(
-                                children: <Widget>[
-                                  Text(
-                                    "See Ratings",
-                                    style: TextStyle(color: Colors.grey),
-                                  ),
-                                  Padding(
-                                    padding: const EdgeInsets.only(top: 8.0),
-                                    child: Text(
-                                      "*****",
-                                      style: TextStyle(
-                                          color:
-                                              Theme.of(context).primaryColor),
-                                    ),
-                                  ),
-                                ],
-                              )
                             ],
                           ),
                         ),
