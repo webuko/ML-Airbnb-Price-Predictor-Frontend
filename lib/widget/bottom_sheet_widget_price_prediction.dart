@@ -400,7 +400,7 @@ class _BottomSheetWidgetPricePredictionState
                 children: [
                   Container(
                     width: 200,
-                    child: Text("Elevator Available?"),
+                    child: Text("Elevator"),
                   ),
                   Expanded(
                     child: Checkbox(
@@ -421,7 +421,7 @@ class _BottomSheetWidgetPricePredictionState
                 children: [
                   Container(
                     width: 200,
-                    child: const Text("Gymnastic Available?"),
+                    child: const Text("Gymnastic"),
                   ),
                   Expanded(
                     child: Checkbox(

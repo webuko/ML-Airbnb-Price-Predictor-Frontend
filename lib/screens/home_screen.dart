@@ -214,7 +214,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
-class MyGoogleMapWidget extends StatefulWidget {
+class MyGoogleMapWidget extends StatelessWidget {
   //MyGoogleMapWidget
   MyGoogleMapWidget({
     required this.drawerActive,
@@ -226,11 +226,6 @@ class MyGoogleMapWidget extends StatefulWidget {
   final bool showFlatMarkers;
   final bool showNeighbourhoodMarkers;
 
-  @override
-  _MyGoogleMapWidgetState createState() => _MyGoogleMapWidgetState();
-}
-
-class _MyGoogleMapWidgetState extends State<MyGoogleMapWidget> {
   final Completer<GoogleMapController> _controller = Completer();
 
   @override
@@ -250,8 +245,11 @@ class _MyGoogleMapWidgetState extends State<MyGoogleMapWidget> {
       );
     } else {
       return GoogleMap(
-        polygons: _myNeighbourhoodProvider.getPolygons,
-        scrollGesturesEnabled: widget.drawerActive == true ? false : true,
+        minMaxZoomPreference: MinMaxZoomPreference(13, 21),
+        polygons: showNeighbourhoodMarkers
+            ? _myNeighbourhoodProvider.getPolygons
+            : {},
+        scrollGesturesEnabled: drawerActive == true ? false : true,
         mapType: MapType.normal,
         initialCameraPosition: const CameraPosition(
           target: LatLng(
@@ -264,11 +262,11 @@ class _MyGoogleMapWidgetState extends State<MyGoogleMapWidget> {
           _controller.complete(controller);
         },
         markers: (() {
-          if (widget.showFlatMarkers && widget.showNeighbourhoodMarkers) {
+          if (showFlatMarkers && showNeighbourhoodMarkers) {
             return all;
-          } else if (widget.showFlatMarkers) {
+          } else if (showFlatMarkers) {
             return _myFlatProvider.allMarkers;
-          } else if (widget.showNeighbourhoodMarkers) {
+          } else if (showNeighbourhoodMarkers) {
             return _myNeighbourhoodProvider.allNeighbourhoodMarkers;
           } else {
             return empty;

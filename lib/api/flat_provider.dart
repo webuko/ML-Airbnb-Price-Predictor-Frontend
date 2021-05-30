@@ -1,10 +1,4 @@
-import 'dart:collection';
-import 'dart:math';
-import 'dart:typed_data';
-
-import 'package:airbnb/gist/Gist.dart';
 import 'package:airbnb/models/place.dart';
-import 'package:airbnb/models/polygon_neighbourhood.dart';
 import 'package:airbnb/screens/flat_detail_screen.dart';
 import 'package:airbnb/widget/bottom_sheet_widget_filter.dart';
 import 'package:airbnb/widget/bottom_sheet_widget_price_prediction.dart';
@@ -13,7 +7,6 @@ import 'package:flutter/rendering.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'package:characters/characters.dart';
 
 class FlatProvider with ChangeNotifier {
   List<Flat> _flats = [];
@@ -107,6 +100,7 @@ class FlatProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  // Get all Flats from the database
   Future<void> allListings(ctx) async {
     _context = ctx;
     _isLoading = true;

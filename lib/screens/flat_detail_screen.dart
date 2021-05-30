@@ -198,34 +198,13 @@ class _FlatDetailcreenState extends State<FlatDetailScreen> {
                         Padding(
                           padding: const EdgeInsets.only(top: 10.0),
                           child: Text(
-                            element.description,
+                            cutDescription(element.description),
                             style: TextStyle(color: Colors.grey),
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.only(bottom: 10.0),
-                          child: Text(
-                            "Read More....",
-                            style: TextStyle(
-                                color: Theme.of(context).primaryColor),
                           ),
                         ),
                       ],
                     ),
                   ),
-                  SizedBox(
-                      height: 100.0,
-                      child:
-                          Container() /*GoogleMap(
-                        onMapCreated: _onMapCreated,
-                        options: GoogleMapOptions(
-                          cameraPosition: CameraPosition(
-                            target: _center,
-                            zoom: 11.0,
-                          ),
-                        ),
-                      ),*/
-                      )
                 ],
               ),
             ),
@@ -233,5 +212,16 @@ class _FlatDetailcreenState extends State<FlatDetailScreen> {
         ],
       ),
     );
+  }
+
+  //Cut everything after the last dot, since the database isn't providing a full description.
+  String cutDescription(String description) {
+    String result = "";
+    int pos = 0;
+    if (description.contains(".")) {
+      pos = description.lastIndexOf(".");
+      result = (pos != -1) ? description.substring(0, pos + 1) : description;
+    }
+    return result;
   }
 }
