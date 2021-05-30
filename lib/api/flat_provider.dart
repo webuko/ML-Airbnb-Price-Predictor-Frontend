@@ -1,4 +1,4 @@
-import 'package:airbnb/models/place.dart';
+import 'package:airbnb/models/flat.dart';
 import 'package:airbnb/screens/flat_detail_screen.dart';
 import 'package:airbnb/widget/bottom_sheet_widget_filter.dart';
 import 'package:airbnb/widget/bottom_sheet_widget_price_prediction.dart';
