@@ -4,6 +4,7 @@ import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:airbnb/gist/gist.dart';
+import 'package:airbnb/host.dart';
 import 'package:airbnb/models/polygon_neighbourhood.dart';
 import 'package:airbnb/widget/bottom_sheet_widget_filter.dart';
 import 'package:flutter/material.dart';
@@ -11,6 +12,8 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
 
 class NeighbourhoodProvider with ChangeNotifier {
+  var activeHost = Host().getActiveHost();
+
   List<PolygonNeighbourhood> _polygonNeighbourhood = [];
   var _context;
 
@@ -108,7 +111,7 @@ class NeighbourhoodProvider with ChangeNotifier {
     } else {
       finalData = {'criteria': data};
     }
-    const url = 'http://localhost:5000/api/avgPricePerNeighbourhood';
+    final url = '${activeHost}/api/avgPricePerNeighbourhood';
     try {
       final response = await http.post(
         Uri.parse(url),
@@ -133,7 +136,7 @@ class NeighbourhoodProvider with ChangeNotifier {
   Future<void> avgPricePerNeighbourhood(ctx) async {
     _context = ctx;
 
-    const url = 'http://localhost:5000/api/avgPricePerNeighbourhood';
+    final url = '${activeHost}/api/avgPricePerNeighbourhood';
     try {
       final response = await http.get(
         Uri.parse(url),

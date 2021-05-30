@@ -1,3 +1,4 @@
+import 'package:airbnb/host.dart';
 import 'package:airbnb/models/flat.dart';
 import 'package:airbnb/screens/flat_detail_screen.dart';
 import 'package:airbnb/widget/bottom_sheet_widget_filter.dart';
@@ -9,6 +10,8 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 class FlatProvider with ChangeNotifier {
+  var activeHost = Host().getActiveHost();
+
   List<Flat> _flats = [];
   bool _drawerActive = false;
   bool _isLoading = false;
@@ -105,7 +108,7 @@ class FlatProvider with ChangeNotifier {
     _context = ctx;
     _isLoading = true;
     // notifyListeners();
-    const url = 'http://localhost:5000/api/allListings';
+    final url = '${activeHost}/api/allListings';
     try {
       final response = await http.get(
         Uri.parse(url),
@@ -249,7 +252,7 @@ class FlatProvider with ChangeNotifier {
       finalData = {'criteria': data};
     }
 
-    const url = 'http://localhost:5000/api/filterListings';
+    final url = '${activeHost}/api/filterListings';
     try {
       final response = await http.post(
         Uri.parse(url),
@@ -312,7 +315,7 @@ class FlatProvider with ChangeNotifier {
 
     final jsonData = jsonEncode(map);
 
-    const url = 'http://localhost:5000/api/pricePrediction';
+    final url = '${activeHost}/api/pricePrediction';
     try {
       final response = await http.post(
         Uri.parse(url),
