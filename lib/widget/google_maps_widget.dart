@@ -50,7 +50,7 @@ class MyGoogleMapWidget extends StatelessWidget {
             52.518817,
             13.407257,
           ),
-          zoom: 16,
+          zoom: 14,
         ),
         onMapCreated: (GoogleMapController controller) {
           _controller.complete(controller);
