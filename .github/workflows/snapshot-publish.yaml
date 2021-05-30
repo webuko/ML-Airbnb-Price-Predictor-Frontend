@@ -3,8 +3,8 @@ name: snapshot-publish
 on:
   workflow_dispatch:
   push:
-    branches:
-      - develop
+    branches-ignore:
+      - main
 
 jobs:
   flutter:
